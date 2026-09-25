@@ -14,7 +14,6 @@ dependencies = [
     "beautifulsoup4",
     "chainlit",
     "ddgs",
-    "feedparser>=6.0.14",
     "httpx",
     "langchain",
     "langchain_core",
