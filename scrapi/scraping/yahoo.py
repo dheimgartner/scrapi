@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 import scrapi.scraping.base as bs
 import scrapi.scraping.selenium as shd
-from scrapi.models.search_result import WebSearchResult
+from scrapi.models.search_result import WebSearchResult, SuccessfulSearch, FailedSearch
 
 
 class YahooScraper(bs.BaseScraper):
@@ -72,18 +72,20 @@ class YahooScraper(bs.BaseScraper):
 
             try:
                 search_result["raw_content"] = selenium.download_html(url)
+                search_result["status"] = SuccessfulSearch(status=200)
             except Exception as e:
                 logging.warning(e)
-                search_result["raw_content"] = "Error"
-                continue
+                search_result["raw_content"] = ""
+                search_result["status"] = FailedSearch(status=0, message=str(e), error=e)
 
     def _create_web_search_result(self, result: dict) -> WebSearchResult:
         return WebSearchResult(
             scraper_repr=repr(self),
+            status=result["status"],
             fetched_at=datetime.now(),
             source={"url": result["href"]},
             raw_content=result["raw_content"],
-            ai_content=self.convert_to_ai_content(result["raw_content"])
+            ai_content=self.convert_to_ai_content(result["raw_content"]),
         )
 
     @staticmethod
