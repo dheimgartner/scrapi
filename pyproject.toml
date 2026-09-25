@@ -29,7 +29,7 @@ dependencies = [
     "SQLAlchemy",
     "tqdm",
     "truststore",
-    "yfinance>=1.7.0",
+    "yfinance",
 ]
 
 [project.optional-dependencies]
