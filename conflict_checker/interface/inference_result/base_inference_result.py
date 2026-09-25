@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 import uuid
 
-from conflict_checker.renderer.mixins import InferenceResultMarkdownMixin
+from conflict_checker.renderer.markdown.mixins import InferenceResultMarkdownMixin
 
 
 @dataclass

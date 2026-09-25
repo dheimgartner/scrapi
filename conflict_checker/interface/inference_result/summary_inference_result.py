@@ -4,7 +4,7 @@ import json
 from conflict_checker.interface.inference_result.base_inference_result import BaseInferenceResult
 from conflict_checker.ai.inference.summary_schema import SummarySchema
 from conflict_checker.storage.database_storable import DatabaseStorable
-from conflict_checker.renderer.mixins import SummaryInferenceResultMarkdownMixin
+from conflict_checker.renderer.markdown.mixins import SummaryInferenceResultMarkdownMixin
 import conflict_checker.interface.table_paths as tp
 
 

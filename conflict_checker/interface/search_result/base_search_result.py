@@ -6,7 +6,7 @@ from typing import Any
 
 from conflict_checker.interface.search_result.status import SearchStatus
 from conflict_checker.scraping.base_scraper import BaseScraper
-from conflict_checker.renderer.mixins import SearchResultMarkdownMixin
+from conflict_checker.renderer.markdown.mixins import SearchResultMarkdownMixin
 
 
 @dataclass
