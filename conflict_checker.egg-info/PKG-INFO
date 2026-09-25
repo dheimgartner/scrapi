@@ -1,0 +1,29 @@
+Metadata-Version: 2.4
+Name: conflict_checker
+Version: 0.0.0
+Summary: Scrape information and analyze it with a LLM
+Author-email: Dominik Lehmann <dominik.lehmann@finma.ch>, Daniel Heimgartner <daniel.heimgartner@finma.ch>
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: beautifulsoup4
+Requires-Dist: chainlit
+Requires-Dist: ddgs
+Requires-Dist: httpx
+Requires-Dist: langchain
+Requires-Dist: langchain_core
+Requires-Dist: langchain_openai
+Requires-Dist: langgraph
+Requires-Dist: markitdown
+Requires-Dist: primp
+Requires-Dist: psutil
+Requires-Dist: px-proxy
+Requires-Dist: pydantic
+Requires-Dist: PyYAML
+Requires-Dist: selenium
+Requires-Dist: SQLAlchemy
+Requires-Dist: tqdm
+Requires-Dist: truststore
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: pipreqs; extra == "dev"
