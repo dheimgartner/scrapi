@@ -4,9 +4,11 @@ from datetime import datetime
 from pydantic import BaseModel
 import uuid
 
+from conflict_checker.renderer.markdown.mixins import InferenceResultMarkdownMixin
+
 
 @dataclass
-class BaseInferenceResult(ABC):
+class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
     """Every BaseSearchResult piped through an inference engine
     must yield an object of class BaseInferenceResult
 

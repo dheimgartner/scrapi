@@ -8,6 +8,7 @@ from conflict_checker.interface.inference_result.search_inference_result import 
 from conflict_checker.interface.inference_result.summary_inference_result import SummaryInferenceResult
 from conflict_checker.interface.search_result.base_search_result import BaseSearchResult
 from conflict_checker.storage.database_storer import DatabaseStorer
+from conflict_checker.renderer.report import Report, ResultPair
 
 
 class Orchestrator:
@@ -66,7 +67,7 @@ class Orchestrator:
 
         self._pipeline_id = uuid.uuid4().hex
 
-    def conflict_check(self) -> SummaryInferenceResult:
+    def conflict_check(self) -> Report:
         """Fetches search results, analyses each, and aggregates to a final summary.
 
         Fetches `self.n` search results for `self.query` via the scraper, runs
@@ -75,7 +76,8 @@ class Orchestrator:
         persists the articles and results to the database.
 
         Returns:
-            The summary `SummaryInferenceResult` produced by `self.summary_inference`.
+            A `Report` pairing each search result with its inference result
+            and containing the final summary.
         """
         search_results = self.scraper.fetch_content(query=self.query, n=self.n)
 
@@ -93,7 +95,11 @@ class Orchestrator:
         if self.save:
             self._save_to_database()
 
-        return summary_inference_result
+        pairs = [
+            ResultPair(search=sr, inference=ir)
+            for sr, ir in zip(self.search_results, self.search_inference_results)
+        ]
+        return Report(results=pairs, summary=self.summary_inference_result)
 
     @property
     def result(self) -> str | None:

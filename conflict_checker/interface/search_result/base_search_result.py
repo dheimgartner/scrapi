@@ -6,10 +6,11 @@ from typing import Any
 
 from conflict_checker.interface.search_result.status import SearchStatus
 from conflict_checker.scraping.base_scraper import BaseScraper
+from conflict_checker.renderer.markdown.mixins import SearchResultMarkdownMixin
 
 
 @dataclass
-class BaseSearchResult(ABC):
+class BaseSearchResult(ABC, SearchResultMarkdownMixin):
     """Every search engine must return on object of type BaseSearchResult
 
     Attributes:

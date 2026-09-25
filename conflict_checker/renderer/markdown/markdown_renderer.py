@@ -1,9 +1,7 @@
 from pathlib import Path
 
-from conflict_checker.renderer.base_renderer import (
-    BaseRenderer,
-    Report
-)
+from conflict_checker.renderer.base_renderer import BaseRenderer
+from conflict_checker.renderer.report import Report
 from conflict_checker.interface.search_result.base_search_result import BaseSearchResult
 from conflict_checker.interface.inference_result.base_inference_result import BaseInferenceResult
 
@@ -33,10 +31,10 @@ class MarkdownRenderer(BaseRenderer):
         return "\n".join(sections).rstrip() + "\n"
 
     def render_search_result(self, result: BaseSearchResult) -> str:
-        return result.ai_content
+        return result.render_as_markdown()
 
     def render_inference_result(self, result: BaseInferenceResult) -> str:
-        return result.result
+        return result.render_as_markdown()
 
     def save(self, path: str) -> None:
         """Render (if not already done) and write the result to disk."""
