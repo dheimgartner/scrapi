@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 import logging
 from typing import Any
 
+import primp
 import yfinance as yf
 from tqdm import tqdm
 
 import scrapi.scraping.base as bs
-import scrapi.scraping.selenium as shd
 from scrapi.models.search_result import WebSearchResult, SuccessfulSearch, FailedSearch
 
 
@@ -14,8 +14,9 @@ class YFinanceScraper(bs.BaseScraper):
     """Fetch Yahoo Finance news for a ticker and convert articles to Markdown.
 
     The query is a ticker symbol (e.g. ``"UBS"``). Up to ``n`` news items are
-    retrieved via the yfinance API, their article pages are downloaded with
-    Selenium, and the HTML is converted to Markdown.
+    retrieved via the yfinance API, their article pages are fetched with
+    primp (browser-impersonation HTTP client), and the HTML is converted to
+    Markdown.
     """
 
     def fetch_content(self, query: str, n: int) -> list[WebSearchResult]:
@@ -38,12 +39,14 @@ class YFinanceScraper(bs.BaseScraper):
 
     @staticmethod
     def _retrieve_and_add_page_content(news_items: list[dict]) -> None:
-        selenium = shd.SeleniumHTMLDownloader()
+        client = primp.Client(impersonate="chrome_131", verify=False)
         for item in tqdm(news_items, desc="Downloading pages"):
             url = item["content"]["canonicalUrl"]["url"]
             try:
-                item["raw_content"] = selenium.download_html(url)
-                item["status"] = SuccessfulSearch(status=200)
+                response = client.get(url)
+                response.raise_for_status()
+                item["raw_content"] = response.text
+                item["status"] = SuccessfulSearch(status=response.status_code)
             except Exception as e:
                 logging.warning(e)
                 item["raw_content"] = ""
