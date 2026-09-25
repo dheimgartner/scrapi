@@ -4,11 +4,11 @@ from datetime import datetime
 from pydantic import BaseModel
 import uuid
 
-from conflict_checker.renderer.mixins import MarkdownRenderable
+from conflict_checker.renderer.mixins import InferenceResultMarkdownMixin
 
 
 @dataclass
-class BaseInferenceResult(ABC, MarkdownRenderable):
+class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
     """Every BaseSearchResult piped through an inference engine
     must yield an object of class BaseInferenceResult
 
@@ -34,6 +34,3 @@ class BaseInferenceResult(ABC, MarkdownRenderable):
     def __post_init__(self) -> None:
         if self.id is None:
             object.__setattr__(self, "id", uuid.uuid4().hex)
-
-    def render_as_markdown(self) -> str:
-        return self.result

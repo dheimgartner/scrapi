@@ -6,11 +6,11 @@ from typing import Any
 
 from conflict_checker.interface.search_result.status import SearchStatus
 from conflict_checker.scraping.base_scraper import BaseScraper
-from conflict_checker.renderer.mixins import MarkdownRenderable
+from conflict_checker.renderer.mixins import SearchResultMarkdownMixin
 
 
 @dataclass
-class BaseSearchResult(ABC, MarkdownRenderable):
+class BaseSearchResult(ABC, SearchResultMarkdownMixin):
     """Every search engine must return on object of type BaseSearchResult
 
     Attributes:
@@ -35,6 +35,3 @@ class BaseSearchResult(ABC, MarkdownRenderable):
     def __post_init__(self) -> None:
         if self.id is None:
             object.__setattr__(self, "id", uuid.uuid4().hex)
-
-    def render_as_markdown(self) -> str:
-        return self.ai_content

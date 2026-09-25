@@ -4,11 +4,12 @@ import json
 from conflict_checker.interface.inference_result.base_inference_result import BaseInferenceResult
 from conflict_checker.ai.inference.search_schema import SearchSchema
 from conflict_checker.storage.database_storable import DatabaseStorable
+from conflict_checker.renderer.mixins import SearchInferenceResultMarkdownMixin
 import conflict_checker.interface.table_paths as tp
 
 
 @dataclass
-class SearchInferenceResult(BaseInferenceResult, DatabaseStorable):
+class SearchInferenceResult(BaseInferenceResult, SearchInferenceResultMarkdownMixin, DatabaseStorable):
     structured_output: SearchSchema
 
     def get_table_path(self) -> tp.TablePath:
@@ -18,6 +19,3 @@ class SearchInferenceResult(BaseInferenceResult, DatabaseStorable):
         d = asdict(self)
         d["structured_output"] = json.dumps(d["structured_output"])
         return d
-
-    def render_as_markdown(self) -> str:
-        return f"**Summary:** {self.structured_output.summary}\n\n**Result:** {self.structured_output.result}"
