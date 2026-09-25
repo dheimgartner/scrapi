@@ -33,10 +33,10 @@ class MarkdownRenderer(BaseRenderer):
         return "\n".join(sections).rstrip() + "\n"
 
     def render_search_result(self, result: BaseSearchResult) -> str:
-        return result.ai_content
+        return result.render_as_markdown()
 
     def render_inference_result(self, result: BaseInferenceResult) -> str:
-        return result.result
+        return result.render_as_markdown()
 
     def save(self, path: str) -> None:
         """Render (if not already done) and write the result to disk."""

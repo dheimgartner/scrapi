@@ -18,3 +18,9 @@ class SummaryInferenceResult(BaseInferenceResult, DatabaseStorable):
         d = asdict(self)
         d["structured_output"] = json.dumps(d["structured_output"])
         return d
+
+    def render_as_markdown(self) -> str:
+        return (
+            f"{self.structured_output.result}\n\n"
+            f"**Key passages:**\n\n{self.structured_output.paragraphs}"
+        )

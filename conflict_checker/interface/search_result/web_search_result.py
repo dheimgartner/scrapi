@@ -16,3 +16,7 @@ class WebSearchResult(BaseSearchResult, DatabaseStorable):
         d["status"] = repr(d["status"])
         d["source"] = json.dumps(d["source"])
         return d
+
+    def render_as_markdown(self) -> str:
+        url = self.source.get("url", "")
+        return f"**Source:** {url}\n\n{self.ai_content}"
