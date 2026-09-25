@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "conflict_checker"
+name = "scrapi"
 version = "0.0.0"
 description = "Scrape information and analyze it with a LLM"
 readme = "README.md"

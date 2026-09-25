@@ -5,8 +5,8 @@ resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version >= '3.14' and sys_platform != 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform != 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version < '3.13' and sys_platform != 'win32'",
 ]
 
@@ -590,64 +590,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/cc/c7/eed8f27100517e8c0
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/06/3d6badcf13db419e25b07041d9c7b4a2c331d3f4e7134445ec5df57714cd/coloredlogs-15.0.1-py2.py3-none-any.whl", hash = "sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934", size = 46018, upload-time = "2021-06-11T10:22:42.561Z" },
 ]
-
-[[package]]
-name = "conflict-checker"
-version = "0.0.0"
-source = { editable = "." }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "chainlit" },
-    { name = "ddgs" },
-    { name = "httpx" },
-    { name = "langchain" },
-    { name = "langchain-core" },
-    { name = "langchain-openai" },
-    { name = "langgraph" },
-    { name = "markitdown" },
-    { name = "primp" },
-    { name = "psutil" },
-    { name = "px-proxy" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "selenium" },
-    { name = "sqlalchemy" },
-    { name = "tqdm" },
-    { name = "truststore" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "black" },
-    { name = "pipreqs" },
-    { name = "pytest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4" },
-    { name = "black", marker = "extra == 'dev'" },
-    { name = "chainlit" },
-    { name = "ddgs" },
-    { name = "httpx" },
-    { name = "langchain" },
-    { name = "langchain-core" },
-    { name = "langchain-openai" },
-    { name = "langgraph" },
-    { name = "markitdown" },
-    { name = "pipreqs", marker = "extra == 'dev'" },
-    { name = "primp" },
-    { name = "psutil" },
-    { name = "px-proxy" },
-    { name = "pydantic" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pyyaml" },
-    { name = "selenium" },
-    { name = "sqlalchemy" },
-    { name = "tqdm" },
-    { name = "truststore" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "cryptography"
@@ -4042,6 +3984,64 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ba/76/65002b08596c389105720a8c0d22298b8dc25a4baf89b2ce431343c8b1de/rpds_py-2026.6.3-cp315-cp315t-win32.whl", hash = "sha256:913ca42ccad3f8cc6e292b587ae8ae49c8c823e5dce51a736252fc7c7cdfa577", size = 201204, upload-time = "2026-06-30T07:17:30.193Z" },
     { url = "https://files.pythonhosted.org/packages/8c/97/d855d6b3c322d1f27e26f5241c42016b56cf01377ea8ed348285f54652f0/rpds_py-2026.6.3-cp315-cp315t-win_amd64.whl", hash = "sha256:ae3d4fe8c0b9213624fdce7279d70e3b148b682ca20719ebd193a23ebfa47324", size = 220719, upload-time = "2026-06-30T07:17:31.788Z" },
 ]
+
+[[package]]
+name = "scrapi"
+version = "0.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "chainlit" },
+    { name = "ddgs" },
+    { name = "httpx" },
+    { name = "langchain" },
+    { name = "langchain-core" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "markitdown" },
+    { name = "primp" },
+    { name = "psutil" },
+    { name = "px-proxy" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "selenium" },
+    { name = "sqlalchemy" },
+    { name = "tqdm" },
+    { name = "truststore" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "black" },
+    { name = "pipreqs" },
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4" },
+    { name = "black", marker = "extra == 'dev'" },
+    { name = "chainlit" },
+    { name = "ddgs" },
+    { name = "httpx" },
+    { name = "langchain" },
+    { name = "langchain-core" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "markitdown" },
+    { name = "pipreqs", marker = "extra == 'dev'" },
+    { name = "primp" },
+    { name = "psutil" },
+    { name = "px-proxy" },
+    { name = "pydantic" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pyyaml" },
+    { name = "selenium" },
+    { name = "sqlalchemy" },
+    { name = "tqdm" },
+    { name = "truststore" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "secretstorage"
