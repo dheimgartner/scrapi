@@ -24,7 +24,7 @@ dependencies = [
     "psutil",
     "px-proxy",
     "pydantic",
-    "PyYAML",
+    "pyyaml",
     "selenium",
     "SQLAlchemy",
     "tqdm",
