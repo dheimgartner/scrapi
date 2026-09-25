@@ -6,16 +6,12 @@ from scrapi.inference.search import SearchInference
 from scrapi.inference.summary import SummaryInference
 from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
 from scrapi.models.search_result import BaseSearchResult
-from scrapi.storage.storer import DatabaseStorer
 from scrapi.models.report import Report, ResultPair
 
 
 class Orchestrator:
-    """Coordinates scraping, LLM analysis, and storage.
+    """Coordinates scraping and LLM analysis."""
 
-    Initialization of injected objects (llm, scraper) is not the
-    responsibility of this class.
-    """
     def __init__(
             self,
             system_prompt: str,
@@ -25,7 +21,6 @@ class Orchestrator:
             n: int,
             llm: BaseLLM,
             scraper: BaseScraper,
-            save=True,
     ) -> None:
         """Initializes the Orchestrator with the given configuration.
 
@@ -38,15 +33,12 @@ class Orchestrator:
             n: Number of search results to fetch.
             llm: LLM inference instance used for analysis and summarisation.
             scraper: Scraper instance used to fetch search results.
-            save: Whether to persist search and inference results to the
-                database. Defaults to True.
         """
         self.system_prompt = system_prompt
         self.task_prompt = task_prompt
         self.summary_prompt = summary_prompt
         self.query = query
         self.n = n
-        self.save = save
         self.llm = llm
         self.scraper = scraper
         self.search_inference = SearchInference(
@@ -71,7 +63,7 @@ class Orchestrator:
 
         Fetches `self.n` search results for `self.query` via the scraper, runs
         per-result inference on each, then runs summary-level inference over all
-        results. If `self.save` is set, persists the results to the database.
+        results.
 
         Returns:
             A `Report` pairing each search result with its inference result
@@ -90,9 +82,6 @@ class Orchestrator:
         summary_inference_result.pipeline_id = self._pipeline_id
         self.summary_inference_result = summary_inference_result
 
-        if self.save:
-            self._save_to_database()
-
         pairs = [
             ResultPair(search=sr, inference=ir)
             for sr, ir in zip(self.search_results, self.search_inference_results)
@@ -105,9 +94,3 @@ class Orchestrator:
         if self.summary_inference_result is None:
             return None
         return self.summary_inference_result.result
-
-    def _save_to_database(self) -> None:
-        storer = DatabaseStorer()
-        storer.write(self.search_results)
-        storer.write(self.search_inference_results)
-        storer.write([self.summary_inference_result])

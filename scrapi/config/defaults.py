@@ -24,7 +24,6 @@ _config = {
             "summary_prompt": _summary_prompt,
             "query": _query,
             "n": 1,
-            "save": False,
         },
     },
 }

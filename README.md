@@ -42,7 +42,6 @@ orchestrator:
       should receive the mandate. Cite your sources.
     query: "Sergio Ermotti AND UBS"
     n: 5
-    save: false
 ```
 
 **Providers**
@@ -57,7 +56,6 @@ orchestrator:
 | Variable | Purpose |
 |---|---|
 | `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI (used by the `openai` provider) |
-| `DB_USER` / `DB_PASSWORD` | SQL Server credentials when `save: true` |
 
 ## Usage
 
@@ -89,7 +87,6 @@ config = parse_config({
             "summary_prompt": "...",
             "query": "Sergio Ermotti AND UBS",
             "n": 5,
-            "save": False,
         }
     },
 })

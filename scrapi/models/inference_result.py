@@ -1,12 +1,9 @@
 from abc import ABC
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
-import json
 import uuid
 from pydantic import BaseModel
 
-from scrapi.storage.storable import DatabaseStorable
-from scrapi.storage import table_path as tp
 from scrapi.inference.schemas import SearchSchema, SummarySchema
 from scrapi.renderer.markdown import (
     InferenceResultMarkdownMixin,
@@ -15,25 +12,10 @@ from scrapi.renderer.markdown import (
 )
 
 
-SCRAPI_SEARCH_INFERENCE_RESULTS = tp.TablePath(
-    "dwhdata.finma.ch",
-    "gbi_reporting",
-    "gbi",
-    "scrapi_search_inference_results",
-)
-
-SCRAPI_SUMMARY_INFERENCE_RESULTS = tp.TablePath(
-    "dwhdata.finma.ch",
-    "gbi_reporting",
-    "gbi",
-    "scrapi_summary_inference_results",
-)
-
-
 @dataclass
 class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
     """Every BaseSearchResult piped through an inference engine
-    must yield an object of class BaseInferenceResult
+    must yield an object of class BaseInferenceResult.
 
     Subclasses must declare the `structured_output` field.
 
@@ -43,7 +25,7 @@ class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
         prompted_at: Timestamp at which the prompt was sent to the inference engine.
         system_prompt: System prompt supplied to the inference engine.
         task_prompt: Task-specific prompt supplied to the inference engine.
-        structured_output: Dict structured output returned by the inference engine; shape is subclass-specific.
+        structured_output: Structured output returned by the inference engine; shape is subclass-specific.
         result: Main field of `structured_output`.
     """
     prompted_at: datetime
@@ -60,26 +42,10 @@ class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
 
 
 @dataclass
-class SearchInferenceResult(BaseInferenceResult, SearchInferenceResultMarkdownMixin, DatabaseStorable):
+class SearchInferenceResult(BaseInferenceResult, SearchInferenceResultMarkdownMixin):
     structured_output: SearchSchema
-
-    def get_table_path(self) -> tp.TablePath:
-        return SCRAPI_SEARCH_INFERENCE_RESULTS
-
-    def to_db_dict(self) -> dict:
-        d = asdict(self)
-        d["structured_output"] = json.dumps(d["structured_output"])
-        return d
 
 
 @dataclass
-class SummaryInferenceResult(BaseInferenceResult, SummaryInferenceResultMarkdownMixin, DatabaseStorable):
+class SummaryInferenceResult(BaseInferenceResult, SummaryInferenceResultMarkdownMixin):
     structured_output: SummarySchema
-
-    def get_table_path(self) -> tp.TablePath:
-        return SCRAPI_SUMMARY_INFERENCE_RESULTS
-
-    def to_db_dict(self) -> dict:
-        d = asdict(self)
-        d["structured_output"] = json.dumps(d["structured_output"])
-        return d

@@ -87,7 +87,6 @@ def test_make_orchestrator_returns_orchestrator():
                 "summary_prompt": "sum",
                 "query": "q",
                 "n": 1,
-                "save": False,
             }
         },
     })
@@ -227,7 +226,6 @@ def test_orchestrator_run():
             n=1,
             llm=mock_llm,
             scraper=mock_scraper,
-            save=False,
         )
         report = orchestrator.run()
 

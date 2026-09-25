@@ -1,12 +1,9 @@
 from abc import ABC
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
-import json
 import uuid
 from typing import Any
 
-from scrapi.storage.storable import DatabaseStorable
-from scrapi.storage import table_path as tp
 from scrapi.renderer.markdown import SearchResultMarkdownMixin, WebSearchResultMarkdownMixin
 
 
@@ -25,17 +22,9 @@ class FailedSearch(SearchStatus):
     error: Exception | None = None
 
 
-SCRAPI_WEB_SEARCH_RESULTS = tp.TablePath(
-    "dwhdata.finma.ch",
-    "gbi_reporting",
-    "gbi",
-    "scrapi_web_search_results",
-)
-
-
 @dataclass
 class BaseSearchResult(ABC, SearchResultMarkdownMixin):
-    """Every search engine must return on object of type BaseSearchResult
+    """Every search engine must return an object of type BaseSearchResult.
 
     Attributes:
         id: Unique identifier for this search result (auto-generated if not provided).
@@ -62,13 +51,5 @@ class BaseSearchResult(ABC, SearchResultMarkdownMixin):
 
 
 @dataclass
-class WebSearchResult(BaseSearchResult, WebSearchResultMarkdownMixin, DatabaseStorable):
-
-    def get_table_path(self) -> tp.TablePath:
-        return SCRAPI_WEB_SEARCH_RESULTS
-
-    def to_db_dict(self) -> dict:
-        d = asdict(self)
-        d["status"] = repr(d["status"])
-        d["source"] = json.dumps(d["source"])
-        return d
+class WebSearchResult(BaseSearchResult, WebSearchResultMarkdownMixin):
+    pass
