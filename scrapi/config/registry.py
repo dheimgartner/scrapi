@@ -6,6 +6,7 @@ Used by the config parsing/factory code to resolve a provider string
 
 from scrapi.llm.openai import OpenaiLLM
 from scrapi.scraping.yahoo import YahooScraper
+from scrapi.scraping.yfinance import YFinanceScraper
 
 LLM_REGISTRY = {
     "openai": OpenaiLLM,
@@ -13,4 +14,5 @@ LLM_REGISTRY = {
 
 SCRAPER_REGISTRY = {
     "yahoo": YahooScraper,
+    "yfinance": YFinanceScraper,
 }
