@@ -39,7 +39,7 @@ class YFinanceScraper(bs.BaseScraper):
 
     @staticmethod
     def _retrieve_and_add_page_content(news_items: list[dict]) -> None:
-        client = primp.Client(impersonate="chrome_131", verify=False)
+        client = primp.Client(impersonate="chrome", verify=False)
         for item in tqdm(news_items, desc="Downloading pages"):
             url = item["content"]["canonicalUrl"]["url"]
             try:
