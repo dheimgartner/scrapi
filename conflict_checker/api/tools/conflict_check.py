@@ -54,7 +54,7 @@ def make_conflict_check_tool(llm: BaseLLM, scraper: BaseScraper):
             scraper=scraper,
             save=save,
         )
-        result = orchestrator.conflict_check()
-        return result.result
+        report = orchestrator.conflict_check()
+        return report.summary.result
 
     return conflict_check

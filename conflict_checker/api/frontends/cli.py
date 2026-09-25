@@ -8,5 +8,5 @@ def cli(config_path: Path, output_path: Path):
     with api.PROXY_SESSION as session:
         config = api.load_yaml_config(config_path)
         orchestrator = api.make_conflict_checker(config)
-        result = orchestrator.conflict_check()
-    api.save_result_to_md(result=result.result, md_path=output_path)
+        report = orchestrator.conflict_check()
+    api.save_result_to_md(result=report.summary.result, md_path=output_path)

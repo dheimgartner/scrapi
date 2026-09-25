@@ -1,9 +1,7 @@
 from pathlib import Path
 
-from conflict_checker.renderer.base_renderer import (
-    BaseRenderer,
-    Report
-)
+from conflict_checker.renderer.base_renderer import BaseRenderer
+from conflict_checker.renderer.report import Report
 from conflict_checker.interface.search_result.base_search_result import BaseSearchResult
 from conflict_checker.interface.inference_result.base_inference_result import BaseInferenceResult
 
