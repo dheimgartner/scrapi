@@ -65,8 +65,8 @@ orchestrator:
 import scrapi
 
 config = scrapi.load_yaml_config("config.yaml")
-orchestrator = scrapi.make_conflict_checker(config)
-report = orchestrator.conflict_check()
+orchestrator = scrapi.make_orchestrator(config)
+report = orchestrator.run()
 
 print(report.summary.result)
 ```
@@ -74,7 +74,7 @@ print(report.summary.result)
 Build a config programmatically instead of from a file:
 
 ```python
-from scrapi import parse_config, make_conflict_checker
+from scrapi import parse_config, make_orchestrator
 
 config = parse_config({
     "scraper": {"provider": "yahoo", "config": {}},
@@ -94,8 +94,8 @@ config = parse_config({
     },
 })
 
-orchestrator = make_conflict_checker(config)
-report = orchestrator.conflict_check()
+orchestrator = make_orchestrator(config)
+report = orchestrator.run()
 ```
 
 The returned `Report` contains individual result pairs (search result + inference result) and a final summary:

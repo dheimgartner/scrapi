@@ -2,19 +2,19 @@ import yaml
 from pathlib import Path
 
 from scrapi.exceptions import ConfigLoadError
-from scrapi.config.schemas import ConflictCheckConfig, ScraperConfig, InferenceConfig, OrchestratorConfig
+from scrapi.config.schemas import ScrapiConfig, ScraperConfig, InferenceConfig, OrchestratorConfig
 
 
-def parse_config(source: dict) -> ConflictCheckConfig:
-    """Parses a config dict into a ConflictCheckConfig.
+def parse_config(source: dict) -> ScrapiConfig:
+    """Parses a config dict into a ScrapiConfig.
 
     Args:
         source: Config dict.
 
     Returns:
-        A ConflictCheckConfig populated from the dict.
+        A ScrapiConfig populated from the dict.
     """
-    return ConflictCheckConfig(
+    return ScrapiConfig(
         scraper=ScraperConfig(
             provider=source["scraper"]["provider"],
             config=source["scraper"].get("config", {}),
@@ -29,14 +29,14 @@ def parse_config(source: dict) -> ConflictCheckConfig:
     )
 
 
-def load_yaml_config(path: Path) -> ConflictCheckConfig:
-    """Loads a conflict checker config from a YAML file.
+def load_yaml_config(path: Path) -> ScrapiConfig:
+    """Loads a scrapi config from a YAML file.
 
     Args:
         path: Path to the YAML config file to load.
 
     Returns:
-        The parsed and validated conflict checker configuration.
+        The parsed and validated scrapi configuration.
 
     Raises:
         ConfigLoadError: If the file's content is not valid YAML, or if

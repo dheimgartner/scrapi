@@ -7,8 +7,8 @@ import scrapi.config.registry as registry
 from scrapi.orchestrator import Orchestrator
 
 
-def make_conflict_checker(config: schema.ConflictCheckConfig) -> Orchestrator:
-    """Creates an Orchestrator from a ConflictCheckConfig.
+def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
+    """Creates an Orchestrator from a ScrapiConfig.
 
     Instantiates the scraper and LLM providers from their respective registries,
     then injects them into the orchestrator config before building the Orchestrator.

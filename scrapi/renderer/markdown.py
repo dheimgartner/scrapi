@@ -52,7 +52,7 @@ class MarkdownRenderer(BaseRenderer):
 
     def render(self) -> str:
         sections = [
-            "# Conflict check report",
+            "# Report",
             "## Summary",
             self.render_inference_result(self._report.summary),
             "## Results"

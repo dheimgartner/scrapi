@@ -1,8 +1,8 @@
-class ConflictCheckerError(Exception):
-    """Base error for all conflict checker exceptions."""
+class ScrapiError(Exception):
+    """Base error for all scrapi exceptions."""
 
 
-class InvalidConfigError(ConflictCheckerError):
+class InvalidConfigError(ScrapiError):
     """Raised when a config is invalid or fails to instantiate a provider."""
 
     def __init__(
@@ -13,5 +13,5 @@ class InvalidConfigError(ConflictCheckerError):
         super().__init__(message)
 
 
-class ConfigLoadError(ConflictCheckerError):
-    """Raised when a config file cannto be read."""
+class ConfigLoadError(ScrapiError):
+    """Raised when a config file cannot be read."""

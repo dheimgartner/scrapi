@@ -7,7 +7,7 @@ from scrapi.llm.base import BaseLLM
 
 
 class OpenaiLLM(BaseLLM):
-    """Azure OpenAI endpoint for conflict checks.
+    """Azure OpenAI endpoint.
 
     Attributes:
         meta: Configuration used to build the underlying chat model,

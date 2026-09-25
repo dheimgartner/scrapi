@@ -11,7 +11,7 @@ class ResultPair(NamedTuple):
 
 
 class Report:
-    """Plain data holder for a conflict-check report.
+    """Plain data holder for a scrapi run's results.
 
     Renderer-agnostic: does not know about output formats and is never
     mutated by a renderer.

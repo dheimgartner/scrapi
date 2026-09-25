@@ -8,10 +8,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scrapi.config.loader import parse_config, load_yaml_config
-from scrapi.config.schemas import ConflictCheckConfig
+from scrapi.config.schemas import ScrapiConfig
 from scrapi.config.defaults import DEFAULT_CONFIG
 from scrapi.exceptions import ConfigLoadError, InvalidConfigError
-from scrapi.factory import make_conflict_checker
+from scrapi.factory import make_orchestrator
 from scrapi.models.search_result import (
     SearchStatus,
     SuccessfulSearch,
@@ -40,7 +40,7 @@ def test_parse_config_valid():
                                     "summary_prompt": "sum", "query": "q", "n": 2}},
     }
     config = parse_config(source)
-    assert isinstance(config, ConflictCheckConfig)
+    assert isinstance(config, ScrapiConfig)
     assert config.scraper.provider == "yahoo"
     assert config.inference.provider == "openai"
     assert config.orchestrator.config["n"] == 2
@@ -73,10 +73,10 @@ def test_load_yaml_config_non_mapping():
 
 
 # ---------------------------------------------------------------------------
-# 3. make_conflict_checker returns Orchestrator for valid config
+# 3. make_orchestrator returns Orchestrator for valid config
 # ---------------------------------------------------------------------------
 
-def test_make_conflict_checker_returns_orchestrator():
+def test_make_orchestrator_returns_orchestrator():
     config = parse_config({
         "scraper": {"provider": "yahoo", "config": {}},
         "inference": {"provider": "openai", "config": {}},
@@ -98,16 +98,16 @@ def test_make_conflict_checker_returns_orchestrator():
 
     with patch("scrapi.config.registry.LLM_REGISTRY", {"openai": lambda **kw: mock_llm_instance}), \
          patch("scrapi.config.registry.SCRAPER_REGISTRY", {"yahoo": lambda **kw: mock_scraper_instance}):
-        orchestrator = make_conflict_checker(config)
+        orchestrator = make_orchestrator(config)
 
     assert isinstance(orchestrator, Orchestrator)
 
 
 # ---------------------------------------------------------------------------
-# 4. make_conflict_checker raises InvalidConfigError for unknown provider
+# 4. make_orchestrator raises InvalidConfigError for unknown provider
 # ---------------------------------------------------------------------------
 
-def test_make_conflict_checker_unknown_scraper():
+def test_make_orchestrator_unknown_scraper():
     config = parse_config({
         "scraper": {"provider": "unknown_scraper", "config": {}},
         "inference": {"provider": "openai", "config": {}},
@@ -123,7 +123,7 @@ def test_make_conflict_checker_unknown_scraper():
     })
 
     with pytest.raises((InvalidConfigError, KeyError)):
-        make_conflict_checker(config)
+        make_orchestrator(config)
 
 
 # ---------------------------------------------------------------------------
@@ -166,10 +166,10 @@ def test_search_status_classes():
 
 
 # ---------------------------------------------------------------------------
-# 7. Orchestrator.conflict_check with mocked scraper and LLM
+# 7. Orchestrator.run with mocked scraper and LLM
 # ---------------------------------------------------------------------------
 
-def test_orchestrator_conflict_check():
+def test_orchestrator_run():
     status = SuccessfulSearch(status=200)
     fake_search_result = WebSearchResult(
         scraper_repr="MockScraper",
@@ -180,26 +180,26 @@ def test_orchestrator_conflict_check():
         ai_content="Article content",
     )
 
-    fake_search_schema = SearchSchema(summary="short summary", result="conflict found")
+    fake_search_schema = SearchSchema(summary="short summary", result="finding")
     fake_search_inference = SearchInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="task",
         structured_output=fake_search_schema,
-        result="conflict found",
+        result="finding",
     )
 
     fake_summary_schema = SummarySchema(
         summary="overall summary",
         paragraphs="key paragraphs here",
-        result="Final verdict: no conflict",
+        result="Final verdict",
     )
     fake_summary_inference = SummaryInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="sum",
         structured_output=fake_summary_schema,
-        result="Final verdict: no conflict",
+        result="Final verdict",
     )
 
     mock_scraper = MagicMock()
@@ -229,7 +229,7 @@ def test_orchestrator_conflict_check():
             scraper=mock_scraper,
             save=False,
         )
-        report = orchestrator.conflict_check()
+        report = orchestrator.run()
 
     assert isinstance(report, Report)
     assert len(report) == 1
@@ -253,26 +253,26 @@ def test_markdown_renderer():
         ai_content="Article content",
     )
 
-    search_schema = SearchSchema(summary="short summary", result="conflict found")
+    search_schema = SearchSchema(summary="short summary", result="finding")
     inference_result = SearchInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="task",
         structured_output=search_schema,
-        result="conflict found",
+        result="finding",
     )
 
     summary_schema = SummarySchema(
         summary="overall summary",
         paragraphs="key paragraphs here",
-        result="Final verdict: no conflict",
+        result="Final verdict",
     )
     summary_result = SummaryInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="sum",
         structured_output=summary_schema,
-        result="Final verdict: no conflict",
+        result="Final verdict",
     )
 
     pair = ResultPair(search=search_result, inference=inference_result)
@@ -282,10 +282,10 @@ def test_markdown_renderer():
     output = renderer.render()
 
     assert isinstance(output, str)
-    assert "# Conflict check report" in output
+    assert "# Report" in output
     assert "## Summary" in output
     assert "## Results" in output
     assert "### Result 1" in output
     assert "#### Search result" in output
     assert "#### Inference result" in output
-    assert "Final verdict: no conflict" in output
+    assert "Final verdict" in output

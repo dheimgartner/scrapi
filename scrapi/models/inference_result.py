@@ -15,18 +15,18 @@ from scrapi.renderer.markdown import (
 )
 
 
-CONFLICT_CHECKER_SEARCH_INFERENCE_RESULTS = tp.TablePath(
+SCRAPI_SEARCH_INFERENCE_RESULTS = tp.TablePath(
     "dwhdata.finma.ch",
     "gbi_reporting",
     "gbi",
-    "conflict_checker_search_inference_results",
+    "scrapi_search_inference_results",
 )
 
-CONFLICT_CHECKER_SUMMARY_INFERENCE_RESULTS = tp.TablePath(
+SCRAPI_SUMMARY_INFERENCE_RESULTS = tp.TablePath(
     "dwhdata.finma.ch",
     "gbi_reporting",
     "gbi",
-    "conflict_checker_summary_inference_results",
+    "scrapi_summary_inference_results",
 )
 
 
@@ -64,7 +64,7 @@ class SearchInferenceResult(BaseInferenceResult, SearchInferenceResultMarkdownMi
     structured_output: SearchSchema
 
     def get_table_path(self) -> tp.TablePath:
-        return CONFLICT_CHECKER_SEARCH_INFERENCE_RESULTS
+        return SCRAPI_SEARCH_INFERENCE_RESULTS
 
     def to_db_dict(self) -> dict:
         d = asdict(self)
@@ -77,7 +77,7 @@ class SummaryInferenceResult(BaseInferenceResult, SummaryInferenceResultMarkdown
     structured_output: SummarySchema
 
     def get_table_path(self) -> tp.TablePath:
-        return CONFLICT_CHECKER_SUMMARY_INFERENCE_RESULTS
+        return SCRAPI_SUMMARY_INFERENCE_RESULTS
 
     def to_db_dict(self) -> dict:
         d = asdict(self)

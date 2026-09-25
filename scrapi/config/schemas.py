@@ -42,8 +42,8 @@ class OrchestratorConfig(BaseConfig):
 
 
 @dataclass
-class ConflictCheckConfig:
-    """Top-level configuration for a conflict-check run.
+class ScrapiConfig:
+    """Top-level configuration for a scrapi run.
 
     Attributes:
         scraper: Configuration for the scraper component.

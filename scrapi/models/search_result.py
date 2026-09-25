@@ -25,11 +25,11 @@ class FailedSearch(SearchStatus):
     error: Exception | None = None
 
 
-CONFLICT_CHECKER_WEB_SEARCH_RESULTS = tp.TablePath(
+SCRAPI_WEB_SEARCH_RESULTS = tp.TablePath(
     "dwhdata.finma.ch",
     "gbi_reporting",
     "gbi",
-    "conflict_checker_web_search_results",
+    "scrapi_web_search_results",
 )
 
 
@@ -65,7 +65,7 @@ class BaseSearchResult(ABC, SearchResultMarkdownMixin):
 class WebSearchResult(BaseSearchResult, WebSearchResultMarkdownMixin, DatabaseStorable):
 
     def get_table_path(self) -> tp.TablePath:
-        return CONFLICT_CHECKER_WEB_SEARCH_RESULTS
+        return SCRAPI_WEB_SEARCH_RESULTS
 
     def to_db_dict(self) -> dict:
         d = asdict(self)

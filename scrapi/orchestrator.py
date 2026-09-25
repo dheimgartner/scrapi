@@ -11,7 +11,7 @@ from scrapi.models.report import Report, ResultPair
 
 
 class Orchestrator:
-    """Coordinates conflict checking and storage.
+    """Coordinates scraping, LLM analysis, and storage.
 
     Initialization of injected objects (llm, scraper) is not the
     responsibility of this class.
@@ -31,12 +31,12 @@ class Orchestrator:
 
         Args:
             system_prompt: System prompt used to initialize the LLM history.
-            task_prompt: Task description passed to the LLM during conflict checking.
+            task_prompt: Task description passed to the LLM for per-result analysis.
             summary_prompt: Prompt used to generate a final summary after
-                processing all articles.
-            query: Search query used to fetch search results via the scraper.
+                processing all results.
+            query: Search query used to fetch results via the scraper.
             n: Number of search results to fetch.
-            llm: LLM inference instance used for conflict checking and prompting.
+            llm: LLM inference instance used for analysis and summarisation.
             scraper: Scraper instance used to fetch search results.
             save: Whether to persist search and inference results to the
                 database. Defaults to True.
@@ -66,13 +66,12 @@ class Orchestrator:
 
         self._pipeline_id = uuid.uuid4().hex
 
-    def conflict_check(self) -> Report:
+    def run(self) -> Report:
         """Fetches search results, analyses each, and aggregates to a final summary.
 
         Fetches `self.n` search results for `self.query` via the scraper, runs
-        search-result-level inference on each, then runs summary-level
-        inference over all search inference results. If `self.save` is set,
-        persists the articles and results to the database.
+        per-result inference on each, then runs summary-level inference over all
+        results. If `self.save` is set, persists the results to the database.
 
         Returns:
             A `Report` pairing each search result with its inference result
@@ -102,7 +101,7 @@ class Orchestrator:
 
     @property
     def result(self) -> str | None:
-        """The final summary text, or None if `conflict_check()` hasn't run yet."""
+        """The final summary text, or None if `run()` hasn't been called yet."""
         if self.summary_inference_result is None:
             return None
         return self.summary_inference_result.result
