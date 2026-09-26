@@ -10,11 +10,11 @@ _query = "example query"
 
 _config = {
     "scraper": {
-        "provider": "yahoo",
+        "provider": "dummy",
         "config": {},
     },
     "inference": {
-        "provider": "openai",
+        "provider": "ollama",
         "config": {},
     },
     "orchestrator": {
