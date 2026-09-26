@@ -5,32 +5,45 @@ from scrapi.exceptions import InvalidConfigError
 import scrapi.config.schemas as schema
 import scrapi.config.registry as registry
 from scrapi.orchestrator import Orchestrator
+from scrapi.inference.search import SearchInference
+from scrapi.inference.summary import SummaryInference
 
 
 def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
     """Creates an Orchestrator from a ScrapiConfig.
 
-    Instantiates the scraper and LLM providers from their respective registries,
-    then injects them into the orchestrator kwargs before building the Orchestrator.
+    Instantiates the LLM, both inference objects, and all scrapers from their
+    respective registries, then wires them into the Orchestrator.
 
     Args:
-        config: Configuration containing scraper, inference, and orchestrator settings.
+        config: Configuration containing LLM, inference, and scraper settings.
 
     Returns:
         A fully instantiated Orchestrator.
     """
-    scraper = _base_factory(
-        registry.SCRAPER_REGISTRY[config.scraper.provider], config.scraper
+    llm = _base_factory(registry.LLM_REGISTRY[config.llm.provider], config.llm)
+
+    search_inference = SearchInference(
+        llm=llm.llm,
+        system_prompt=config.inference.search.system_prompt,
+        task_prompt=config.inference.search.task_prompt,
     )
-    llm = _base_factory(
-        registry.LLM_REGISTRY[config.inference.provider], config.inference
+    summary_inference = SummaryInference(
+        llm=llm.llm,
+        system_prompt=config.inference.summary.system_prompt,
+        task_prompt=config.inference.summary.task_prompt,
     )
 
-    kwargs = {**config.orchestrator.config, "scraper": scraper, "llm": llm}
-    try:
-        return Orchestrator(**kwargs)
-    except Exception as e:
-        raise InvalidConfigError(f"Failed to instantiate Orchestrator: {e}", cause=e) from e
+    scrapers = [
+        (_base_factory(registry.SCRAPER_REGISTRY[sc.provider], sc), sc.fetch)
+        for sc in config.scrapers
+    ]
+
+    return Orchestrator(
+        scrapers=scrapers,
+        search_inference=search_inference,
+        summary_inference=summary_inference,
+    )
 
 
 def _base_factory(cls: type, config: schema.BaseConfig) -> Any:
