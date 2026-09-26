@@ -1,5 +1,7 @@
 from scrapi.scraping.yahoo import YahooScraper
 from scrapi.scraping.dummy import DummyScraper
+from scrapi.config.loader import parse_config
+from scrapi.factory import make_orchestrator
 
 # --- DummyScraper: no network, instant results ---
 scraper = DummyScraper()
@@ -18,3 +20,32 @@ for result in results:
     print(result.source["url"])
     print(result.ai_content[:500])
     print("---")
+
+# --- Orchestrator: full pipeline via config + factory (requires ollama) ---
+config = parse_config({
+    "llm": {
+        "provider": "ollama",
+        "config": {},
+    },
+    "inference": {
+        "search": {
+            "system_prompt": "You are a helpful research analyst.",
+            "task_prompt": "Summarize the key findings from the article.",
+        },
+        "summary": {
+            "system_prompt": "You are a helpful research analyst.",
+            "task_prompt": "Provide a concise final summary across all sources. Cite your sources.",
+        },
+    },
+    "scrapers": [
+        {
+            "provider": "dummy",
+            "config": {},
+            "fetch": {"query": "Sergio Ermotti UBS", "n": 2},
+        },
+    ],
+})
+
+orchestrator = make_orchestrator(config)
+report = orchestrator.run()
+print(report.summary.result)
