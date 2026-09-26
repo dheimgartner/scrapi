@@ -6,6 +6,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from markitdown import MarkItDown
 
+from scrapi.exceptions import NoResultsFoundError
 from scrapi.models.search_result import BaseSearchResult
 
 
@@ -22,7 +23,7 @@ class BaseScraper(ABC):
     """
 
     @abstractmethod
-    def fetch_content(self, query: str, n: int) -> list[BaseSearchResult]:
+    def _fetch_content(self, query: str, n: int) -> list[BaseSearchResult]:
         """Retrieve content matching a query.
 
         Implementations are responsible for executing the query against
@@ -38,6 +39,20 @@ class BaseScraper(ABC):
                 base search result.
         """
         pass
+
+    def fetch_content(self, query: str, n: int) -> list[BaseSearchResult]:
+        """Retrieve content, raising ``NoResultsFoundError`` on failure.
+
+        Wraps ``_fetch_content`` and raises if the result is empty or if
+        the underlying implementation raises any exception.
+        """
+        try:
+            results = self._fetch_content(query, n)
+        except Exception as e:
+            raise NoResultsFoundError("No results found") from e
+        if not results:
+            raise NoResultsFoundError("No results found")
+        return results
 
     @staticmethod
     @abstractmethod

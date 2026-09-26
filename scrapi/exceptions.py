@@ -15,3 +15,7 @@ class InvalidConfigError(ScrapiError):
 
 class ConfigLoadError(ScrapiError):
     """Raised when a config file cannot be read."""
+
+
+class NoResultsFoundError(ScrapiError):
+    """Raised when a scraper returns no results or errors during fetch."""
