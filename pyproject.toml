@@ -40,3 +40,8 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
