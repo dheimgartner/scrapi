@@ -3,12 +3,11 @@ from dataclasses import dataclass, field
 
 @dataclass
 class BaseConfig:
-    """Base config shared by scraper/inference component configs.
+    """Base config for components resolved via a provider registry.
 
     Attributes:
-        provider: Name of the provider implementation to use (e.g. a
-            key into a provider registry).
-        config: Provider-specific configuration options.
+        provider: Registry key identifying the implementation to use.
+        config: Provider-specific keyword arguments.
     """
 
     provider: str
@@ -18,27 +17,24 @@ class BaseConfig:
 @dataclass
 class ScraperConfig(BaseConfig):
     """Configuration for the scraper component."""
-
     pass
 
 
 @dataclass
 class InferenceConfig(BaseConfig):
     """Configuration for the inference component."""
-
     pass
 
 
 @dataclass
-class OrchestratorConfig(BaseConfig):
+class OrchestratorConfig:
     """Configuration for the orchestrator component.
 
     Attributes:
-        provider: Unused for the orchestrator, which has no provider
-            registry. Defaults to "_".
+        config: Keyword arguments passed directly to Orchestrator.__init__.
     """
 
-    provider: str = "_"
+    config: dict = field(default_factory=dict)
 
 
 @dataclass

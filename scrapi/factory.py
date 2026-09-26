@@ -11,7 +11,7 @@ def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
     """Creates an Orchestrator from a ScrapiConfig.
 
     Instantiates the scraper and LLM providers from their respective registries,
-    then injects them into the orchestrator config before building the Orchestrator.
+    then injects them into the orchestrator kwargs before building the Orchestrator.
 
     Args:
         config: Configuration containing scraper, inference, and orchestrator settings.
@@ -26,11 +26,11 @@ def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
         registry.LLM_REGISTRY[config.inference.provider], config.inference
     )
 
-    orchestrator = schema.OrchestratorConfig(
-        provider="_",
-        config={**config.orchestrator.config, "scraper": scraper, "llm": llm},
-    )
-    return _base_factory(Orchestrator, orchestrator)
+    kwargs = {**config.orchestrator.config, "scraper": scraper, "llm": llm}
+    try:
+        return Orchestrator(**kwargs)
+    except Exception as e:
+        raise InvalidConfigError(f"Failed to instantiate Orchestrator: {e}", cause=e) from e
 
 
 def _base_factory(cls: type, config: schema.BaseConfig) -> Any:
@@ -58,7 +58,6 @@ def _ensure_no_extra_params(
     provider: str,
 ) -> None:
     valid = set(params) - {"self"}
-
     if unknown := set(kwargs) - valid:
         raise InvalidConfigError(f"{provider!r} got unexpected arguments: {unknown}")
 
@@ -76,6 +75,5 @@ def _ensure_required_params(
         and p.kind
         not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
     }
-
     if missing := required - set(kwargs):
         raise InvalidConfigError(f"{provider!r} missing required arguments: {missing}")
