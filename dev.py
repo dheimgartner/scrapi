@@ -25,7 +25,7 @@ for result in results:
 config = parse_config({
     "llm": {
         "provider": "ollama",
-        "config": {},
+        "config": {"base_url": "http://10.89.0.7:11434/v1"},
     },
     "inference": {
         "search": {
