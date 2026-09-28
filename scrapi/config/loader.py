@@ -2,7 +2,14 @@ import yaml
 from pathlib import Path
 
 from scrapi.exceptions import ConfigLoadError
-from scrapi.config.schemas import ScrapiConfig, ScraperConfig, InferenceConfig, OrchestratorConfig
+from scrapi.config.schemas import (
+    ScrapiConfig,
+    LLMConfig,
+    ScraperConfig,
+    InferenceConfig,
+    SearchInferenceConfig,
+    SummaryInferenceConfig,
+)
 
 
 def parse_config(source: dict) -> ScrapiConfig:
@@ -15,17 +22,28 @@ def parse_config(source: dict) -> ScrapiConfig:
         A ScrapiConfig populated from the dict.
     """
     return ScrapiConfig(
-        scraper=ScraperConfig(
-            provider=source["scraper"]["provider"],
-            config=source["scraper"].get("config", {}),
+        llm=LLMConfig(
+            provider=source["llm"]["provider"],
+            config=source["llm"].get("config", {}),
         ),
         inference=InferenceConfig(
-            provider=source["inference"]["provider"],
-            config=source["inference"].get("config", {}),
+            search=SearchInferenceConfig(
+                system_prompt=source["inference"]["search"]["system_prompt"],
+                task_prompt=source["inference"]["search"]["task_prompt"],
+            ),
+            summary=SummaryInferenceConfig(
+                system_prompt=source["inference"]["summary"]["system_prompt"],
+                task_prompt=source["inference"]["summary"]["task_prompt"],
+            ),
         ),
-        orchestrator=OrchestratorConfig(
-            config=source["orchestrator"].get("config", {}),
-        ),
+        scrapers=[
+            ScraperConfig(
+                provider=s["provider"],
+                config=s.get("config", {}),
+                fetch=s.get("fetch", {}),
+            )
+            for s in source["scrapers"]
+        ],
     )
 
 

@@ -15,26 +15,59 @@ class BaseConfig:
 
 
 @dataclass
+class LLMConfig(BaseConfig):
+    """Configuration for the LLM component."""
+    pass
+
+
+@dataclass
 class ScraperConfig(BaseConfig):
-    """Configuration for the scraper component."""
-    pass
-
-
-@dataclass
-class InferenceConfig(BaseConfig):
-    """Configuration for the inference component."""
-    pass
-
-
-@dataclass
-class OrchestratorConfig:
-    """Configuration for the orchestrator component.
+    """Configuration for a single scraper, including its fetch call arguments.
 
     Attributes:
-        config: Keyword arguments passed directly to Orchestrator.__init__.
+        fetch: Keyword arguments forwarded to ``scraper.fetch_content()``.
     """
 
-    config: dict = field(default_factory=dict)
+    fetch: dict = field(default_factory=dict)
+
+
+@dataclass
+class SearchInferenceConfig:
+    """Prompts for per-result structured extraction.
+
+    Attributes:
+        system_prompt: System-level instructions for the LLM.
+        task_prompt: Human-level instructions for the extraction task.
+    """
+
+    system_prompt: str
+    task_prompt: str
+
+
+@dataclass
+class SummaryInferenceConfig:
+    """Prompts for final summary generation.
+
+    Attributes:
+        system_prompt: System-level instructions for the LLM.
+        task_prompt: Human-level instructions for the summarisation task.
+    """
+
+    system_prompt: str
+    task_prompt: str
+
+
+@dataclass
+class InferenceConfig:
+    """Configuration for both inference stages.
+
+    Attributes:
+        search: Config for per-result search inference.
+        summary: Config for final summary inference.
+    """
+
+    search: SearchInferenceConfig
+    summary: SummaryInferenceConfig
 
 
 @dataclass
@@ -42,11 +75,11 @@ class ScrapiConfig:
     """Top-level configuration for a scrapi run.
 
     Attributes:
-        scraper: Configuration for the scraper component.
-        inference: Configuration for the inference component.
-        orchestrator: Configuration for the orchestrator component.
+        llm: Configuration for the LLM provider.
+        inference: Configuration for both inference stages.
+        scrapers: List of scraper configurations, each with its own fetch args.
     """
 
-    scraper: ScraperConfig = field(default_factory=ScraperConfig)
-    inference: InferenceConfig = field(default_factory=InferenceConfig)
-    orchestrator: OrchestratorConfig = field(default_factory=OrchestratorConfig)
+    llm: LLMConfig
+    inference: InferenceConfig
+    scrapers: list[ScraperConfig]

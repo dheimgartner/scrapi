@@ -23,9 +23,27 @@ from scrapi.models.inference_result import (
     SummaryInferenceResult,
 )
 from scrapi.inference.schemas import SearchSchema, SummarySchema
-from scrapi.models.report import Report, ResultPair
+from scrapi.models.pipeline_result import PipelineResult, ResultPair
 from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.orchestrator import Orchestrator
+
+
+_BASE_CONFIG = {
+    "llm": {"provider": "ollama", "config": {}},
+    "inference": {
+        "search": {
+            "system_prompt": "sys",
+            "task_prompt": "task",
+        },
+        "summary": {
+            "system_prompt": "sys",
+            "task_prompt": "sum",
+        },
+    },
+    "scrapers": [
+        {"provider": "yahoo", "config": {}, "fetch": {"query": "q", "n": 2}},
+    ],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -33,17 +51,13 @@ from scrapi.orchestrator import Orchestrator
 # ---------------------------------------------------------------------------
 
 def test_parse_config_valid():
-    source = {
-        "scraper": {"provider": "yahoo", "config": {}},
-        "inference": {"provider": "openai", "config": {}},
-        "orchestrator": {"config": {"system_prompt": "sys", "task_prompt": "task",
-                                    "summary_prompt": "sum", "query": "q", "n": 2}},
-    }
-    config = parse_config(source)
+    config = parse_config(_BASE_CONFIG)
     assert isinstance(config, ScrapiConfig)
-    assert config.scraper.provider == "yahoo"
-    assert config.inference.provider == "openai"
-    assert config.orchestrator.config["n"] == 2
+    assert config.llm.provider == "ollama"
+    assert config.inference.search.system_prompt == "sys"
+    assert config.inference.summary.task_prompt == "sum"
+    assert config.scrapers[0].provider == "yahoo"
+    assert config.scrapers[0].fetch["n"] == 2
 
 
 # ---------------------------------------------------------------------------
@@ -77,25 +91,13 @@ def test_load_yaml_config_non_mapping():
 # ---------------------------------------------------------------------------
 
 def test_make_orchestrator_returns_orchestrator():
-    config = parse_config({
-        "scraper": {"provider": "yahoo", "config": {}},
-        "inference": {"provider": "openai", "config": {}},
-        "orchestrator": {
-            "config": {
-                "system_prompt": "sys",
-                "task_prompt": "task",
-                "summary_prompt": "sum",
-                "query": "q",
-                "n": 1,
-            }
-        },
-    })
+    config = parse_config(_BASE_CONFIG)
 
     mock_llm_instance = MagicMock()
     mock_llm_instance.llm = MagicMock()
     mock_scraper_instance = MagicMock()
 
-    with patch("scrapi.config.registry.LLM_REGISTRY", {"openai": lambda **kw: mock_llm_instance}), \
+    with patch("scrapi.config.registry.LLM_REGISTRY", {"ollama": lambda **kw: mock_llm_instance}), \
          patch("scrapi.config.registry.SCRAPER_REGISTRY", {"yahoo": lambda **kw: mock_scraper_instance}):
         orchestrator = make_orchestrator(config)
 
@@ -108,17 +110,8 @@ def test_make_orchestrator_returns_orchestrator():
 
 def test_make_orchestrator_unknown_scraper():
     config = parse_config({
-        "scraper": {"provider": "unknown_scraper", "config": {}},
-        "inference": {"provider": "openai", "config": {}},
-        "orchestrator": {
-            "config": {
-                "system_prompt": "sys",
-                "task_prompt": "task",
-                "summary_prompt": "sum",
-                "query": "q",
-                "n": 1,
-            }
-        },
+        **_BASE_CONFIG,
+        "scrapers": [{"provider": "unknown_scraper", "config": {}, "fetch": {}}],
     })
 
     with pytest.raises((InvalidConfigError, KeyError)):
@@ -165,7 +158,7 @@ def test_search_status_classes():
 
 
 # ---------------------------------------------------------------------------
-# 7. Orchestrator.run with mocked scraper and LLM
+# 7. Orchestrator.run with mocked scraper and inference objects
 # ---------------------------------------------------------------------------
 
 def test_orchestrator_run():
@@ -204,32 +197,21 @@ def test_orchestrator_run():
     mock_scraper = MagicMock()
     mock_scraper.fetch_content.return_value = [fake_search_result]
 
-    mock_llm = MagicMock()
-    mock_llm.llm = MagicMock()
+    mock_search_inference = MagicMock()
+    mock_search_inference.analyse.return_value = fake_search_inference
 
-    with patch("scrapi.orchestrator.SearchInference") as MockSearchInf, \
-         patch("scrapi.orchestrator.SummaryInference") as MockSummaryInf:
+    mock_summary_inference = MagicMock()
+    mock_summary_inference.analyse.return_value = fake_summary_inference
 
-        mock_search_inf_instance = MagicMock()
-        mock_search_inf_instance.analyse.return_value = fake_search_inference
-        MockSearchInf.return_value = mock_search_inf_instance
+    orchestrator = Orchestrator(
+        scrapers=[(mock_scraper, {"query": "test query", "n": 1})],
+        search_inference=mock_search_inference,
+        summary_inference=mock_summary_inference,
+    )
+    report = orchestrator.run()
 
-        mock_summary_inf_instance = MagicMock()
-        mock_summary_inf_instance.analyse.return_value = fake_summary_inference
-        MockSummaryInf.return_value = mock_summary_inf_instance
-
-        orchestrator = Orchestrator(
-            system_prompt="sys",
-            task_prompt="task",
-            summary_prompt="sum",
-            query="test query",
-            n=1,
-            llm=mock_llm,
-            scraper=mock_scraper,
-        )
-        report = orchestrator.run()
-
-    assert isinstance(report, Report)
+    mock_scraper.fetch_content.assert_called_once_with(query="test query", n=1)
+    assert isinstance(report, PipelineResult)
     assert len(report) == 1
     assert report.results[0].search is fake_search_result
     assert report.results[0].inference is fake_search_inference
@@ -274,9 +256,9 @@ def test_markdown_renderer():
     )
 
     pair = ResultPair(search=search_result, inference=inference_result)
-    report = Report(results=[pair], summary=summary_result)
+    report = PipelineResult(results=[pair], summary=summary_result)
 
-    renderer = MarkdownRenderer(report)
+    renderer = MarkdownRenderer(pipeline_result=report)
     output = renderer.render()
 
     assert isinstance(output, str)

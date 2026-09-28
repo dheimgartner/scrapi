@@ -10,7 +10,7 @@ class ResultPair(NamedTuple):
     inference: BaseInferenceResult | None
 
 
-class Report:
+class PipelineResult:
     """Plain data holder for a scrapi run's results.
 
     Renderer-agnostic: does not know about output formats and is never
