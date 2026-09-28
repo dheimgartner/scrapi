@@ -3,8 +3,7 @@ import uuid
 from scrapi.scraping.base import BaseScraper
 from scrapi.inference.search import SearchInference
 from scrapi.inference.summary import SummaryInference
-from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
-from scrapi.models.search_result import BaseSearchResult
+from scrapi.models.inference_result import SearchInferenceResult
 from scrapi.models.pipeline_result import PipelineResult, ResultPair
 
 
@@ -29,10 +28,7 @@ class Orchestrator:
         self.search_inference = search_inference
         self.summary_inference = summary_inference
 
-        self.search_results: list[BaseSearchResult] = []
-        self.search_inference_results: list[SearchInferenceResult] = []
-        self.summary_inference_result: SummaryInferenceResult | None = None
-
+        self.pipeline_result: PipelineResult | None = None
         self._pipeline_id = uuid.uuid4().hex
 
     def run(self) -> PipelineResult:
@@ -46,28 +42,26 @@ class Orchestrator:
             A ``PipelineResult`` pairing each search result with its inference result
             and containing the final summary.
         """
+        pairs: list[ResultPair] = []
+        search_inference_results: list[SearchInferenceResult] = []
+
         for scraper, fetch_kwargs in self.scrapers:
-            search_results = scraper.fetch_content(**fetch_kwargs)
-            for sr in search_results:
+            for sr in scraper.fetch_content(**fetch_kwargs):
                 sr.pipeline_id = self._pipeline_id
-                self.search_results.append(sr)
-                inference_result = self.search_inference.analyse(sr)
-                inference_result.pipeline_id = self._pipeline_id
-                self.search_inference_results.append(inference_result)
+                ir = self.search_inference.analyse(sr)
+                ir.pipeline_id = self._pipeline_id
+                pairs.append(ResultPair(search=sr, inference=ir))
+                search_inference_results.append(ir)
 
-        summary_inference_result = self.summary_inference.analyse(self.search_inference_results)
-        summary_inference_result.pipeline_id = self._pipeline_id
-        self.summary_inference_result = summary_inference_result
+        summary = self.summary_inference.analyse(search_inference_results)
+        summary.pipeline_id = self._pipeline_id
 
-        pairs = [
-            ResultPair(search=sr, inference=ir)
-            for sr, ir in zip(self.search_results, self.search_inference_results)
-        ]
-        return PipelineResult(results=pairs, summary=self.summary_inference_result)
+        self.pipeline_result = PipelineResult(results=pairs, summary=summary)
+        return self.pipeline_result
 
     @property
     def result(self) -> str | None:
         """The final summary text, or None if ``run()`` hasn't been called yet."""
-        if self.summary_inference_result is None:
+        if self.pipeline_result is None:
             return None
-        return self.summary_inference_result.result
+        return self.pipeline_result.summary.result
