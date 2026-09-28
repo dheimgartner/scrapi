@@ -11,15 +11,15 @@ if TYPE_CHECKING:
 
 class BaseRenderer(ABC):
 
-    def __init__(self, report: PipelineResult) -> None:
-        self._report = report
+    def __init__(self, pipeline_result: PipelineResult) -> None:
+        self._pipeline_result = pipeline_result
         self._document: str | None = None
 
     @abstractmethod
     def render(self) -> str:
-        """Renders the report and returns it as a string.
+        """Renders the pipeline result and returns it as a string.
 
-        Implementations should walk `self._report`, call
+        Implementations should walk `self._pipeline_result`, call
         `render_search_result()` and `render_inference_result()`,
         assemble the final document, and return it.
         """

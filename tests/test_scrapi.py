@@ -258,7 +258,7 @@ def test_markdown_renderer():
     pair = ResultPair(search=search_result, inference=inference_result)
     report = PipelineResult(results=[pair], summary=summary_result)
 
-    renderer = MarkdownRenderer(report)
+    renderer = MarkdownRenderer(pipeline_result=report)
     output = renderer.render()
 
     assert isinstance(output, str)
