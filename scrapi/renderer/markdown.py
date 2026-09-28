@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from scrapi.renderer.base import BaseRenderer
 
 if TYPE_CHECKING:
-    from scrapi.models.report import Report
+    from scrapi.models.report import PipelineResult
     from scrapi.models.search_result import BaseSearchResult
     from scrapi.models.inference_result import BaseInferenceResult
 
@@ -47,7 +47,7 @@ class SummaryInferenceResultMarkdownMixin(InferenceResultMarkdownMixin):
 
 class MarkdownRenderer(BaseRenderer):
 
-    def __init__(self, report: Report) -> None:
+    def __init__(self, report: PipelineResult) -> None:
         super().__init__(report)
 
     def render(self) -> str:

@@ -23,7 +23,7 @@ from scrapi.models.inference_result import (
     SummaryInferenceResult,
 )
 from scrapi.inference.schemas import SearchSchema, SummarySchema
-from scrapi.models.report import Report, ResultPair
+from scrapi.models.report import PipelineResult, ResultPair
 from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.orchestrator import Orchestrator
 
@@ -211,7 +211,7 @@ def test_orchestrator_run():
     report = orchestrator.run()
 
     mock_scraper.fetch_content.assert_called_once_with(query="test query", n=1)
-    assert isinstance(report, Report)
+    assert isinstance(report, PipelineResult)
     assert len(report) == 1
     assert report.results[0].search is fake_search_result
     assert report.results[0].inference is fake_search_inference
@@ -256,7 +256,7 @@ def test_markdown_renderer():
     )
 
     pair = ResultPair(search=search_result, inference=inference_result)
-    report = Report(results=[pair], summary=summary_result)
+    report = PipelineResult(results=[pair], summary=summary_result)
 
     renderer = MarkdownRenderer(report)
     output = renderer.render()

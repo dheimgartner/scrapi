@@ -4,14 +4,14 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from scrapi.models.report import Report
+    from scrapi.models.report import PipelineResult
     from scrapi.models.search_result import BaseSearchResult
     from scrapi.models.inference_result import BaseInferenceResult
 
 
 class BaseRenderer(ABC):
 
-    def __init__(self, report: Report) -> None:
+    def __init__(self, report: PipelineResult) -> None:
         self._report = report
         self._document: str | None = None
 
