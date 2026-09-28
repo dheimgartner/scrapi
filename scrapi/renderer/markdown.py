@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from scrapi.renderer.base import BaseRenderer
 
 if TYPE_CHECKING:
-    from scrapi.models.report import PipelineResult
+    from scrapi.models.pipeline_result import PipelineResult
     from scrapi.models.search_result import BaseSearchResult
     from scrapi.models.inference_result import BaseInferenceResult
 

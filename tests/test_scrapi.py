@@ -23,7 +23,7 @@ from scrapi.models.inference_result import (
     SummaryInferenceResult,
 )
 from scrapi.inference.schemas import SearchSchema, SummarySchema
-from scrapi.models.report import PipelineResult, ResultPair
+from scrapi.models.pipeline_result import PipelineResult, ResultPair
 from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.orchestrator import Orchestrator
 

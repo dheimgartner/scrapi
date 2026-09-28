@@ -5,7 +5,7 @@ from scrapi.inference.search import SearchInference
 from scrapi.inference.summary import SummaryInference
 from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
 from scrapi.models.search_result import BaseSearchResult
-from scrapi.models.report import PipelineResult, ResultPair
+from scrapi.models.pipeline_result import PipelineResult, ResultPair
 
 
 class Orchestrator:
