@@ -24,7 +24,7 @@ from scrapi.models.inference_result import (
 )
 from scrapi.inference.schemas import SearchSchema, SummarySchema
 from scrapi.models.pipeline_result import PipelineResult, ResultPair
-from scrapi.renderer.markdown import MarkdownRenderer, format_search_result
+from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.orchestrator import Orchestrator
 
 
@@ -119,27 +119,7 @@ def test_make_orchestrator_unknown_scraper():
 
 
 # ---------------------------------------------------------------------------
-# 5. WebSearchResult construction and render_as_markdown
-# ---------------------------------------------------------------------------
-
-def test_web_search_result_render_as_markdown():
-    status = SuccessfulSearch(status=200)
-    result = WebSearchResult(
-        scraper_repr="YahooScraper",
-        status=status,
-        fetched_at=datetime(2025, 1, 1),
-        source={"url": "https://example.com"},
-        raw_content="<html>raw</html>",
-        ai_content="Some article content",
-    )
-    md = format_search_result(result)
-    assert md
-    assert "https://example.com" in md
-    assert "Some article content" in md
-
-
-# ---------------------------------------------------------------------------
-# 6. SearchStatus, SuccessfulSearch, FailedSearch
+# 5. SearchStatus, SuccessfulSearch, FailedSearch
 # ---------------------------------------------------------------------------
 
 def test_search_status_classes():
@@ -262,10 +242,8 @@ def test_markdown_renderer():
     output = renderer.render()
 
     assert isinstance(output, str)
-    assert "# Report" in output
+    assert "# Scrapi report" in output
+    assert "## Search results" in output
+    assert "https://example.com" in output
     assert "## Summary" in output
-    assert "## Results" in output
-    assert "### Result 1" in output
-    assert "#### Search result" in output
-    assert "#### Inference result" in output
     assert "Final verdict" in output
