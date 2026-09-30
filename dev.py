@@ -47,12 +47,12 @@ config = parse_config({
 })
 
 orchestrator = make_orchestrator(config)
-report = orchestrator.run()
-print(report.summary.result)
+pipeline_result = orchestrator.run()
+print(pipeline_result.summary.result)
 
 # --- MarkdownRenderer: render pipeline result to markdown ---
 from scrapi.renderer.markdown import MarkdownRenderer
 
-renderer = MarkdownRenderer(pipeline_result=report)
+renderer = MarkdownRenderer(pipeline_result=pipeline_result)
 print(renderer.render())
 # renderer.save("report.md")
