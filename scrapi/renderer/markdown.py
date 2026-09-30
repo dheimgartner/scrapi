@@ -1,48 +1,28 @@
 from __future__ import annotations
 
+from functools import singledispatch
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from scrapi.renderer.base import BaseRenderer
+from scrapi.models.inference_result import SummaryInferenceResult
 
 if TYPE_CHECKING:
     from scrapi.models.pipeline_result import PipelineResult
-    from scrapi.models.search_result import BaseSearchResult
     from scrapi.models.inference_result import BaseInferenceResult
 
 
-class MarkdownRenderable:
-    def render_as_markdown(self) -> str:
-        raise NotImplementedError
+@singledispatch
+def format_inference_result(result: BaseInferenceResult) -> str:
+    return result.result
 
 
-class SearchResultMarkdownMixin(MarkdownRenderable):
-    def render_as_markdown(self) -> str:
-        return self.ai_content
-
-
-class WebSearchResultMarkdownMixin(SearchResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        url = self.source.get("url", "")
-        return f"**Source:** {url}\n\n{self.ai_content}"
-
-
-class InferenceResultMarkdownMixin(MarkdownRenderable):
-    def render_as_markdown(self) -> str:
-        return self.result
-
-
-class SearchInferenceResultMarkdownMixin(InferenceResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        return f"**Summary:** {self.structured_output.summary}\n\n**Result:** {self.structured_output.result}"
-
-
-class SummaryInferenceResultMarkdownMixin(InferenceResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        return (
-            f"{self.structured_output.result}\n\n"
-            f"**Key passages:**\n\n{self.structured_output.paragraphs}"
-        )
+@format_inference_result.register
+def _(result: SummaryInferenceResult) -> str:
+    return (
+        f"{result.structured_output.result}\n\n"
+        f"**Key passages:**\n\n{result.structured_output.paragraphs}"
+    )
 
 
 class MarkdownRenderer(BaseRenderer):
@@ -51,34 +31,24 @@ class MarkdownRenderer(BaseRenderer):
         super().__init__(pipeline_result)
 
     def render(self) -> str:
-        sections = [
-            "# Report",
-            "## Summary",
-            self.render_inference_result(self._pipeline_result.summary),
-            "## Results"
-        ]
+        sections = ["# Scrapi report", "## Search results"]
 
         if len(self._pipeline_result) == 0:
             sections.append("_No results._")
         else:
+            rows = ["| # | ID | Source |", "|---|---|---|"]
             for i, pair in enumerate(self._pipeline_result, start=1):
-                sections.append(f"### Result {i}")
-                sections.append("#### Search result")
-                sections.append(self.render_search_result(pair.search))
-                sections.append("#### Inference result")
-                sections.append(self.render_inference_result(pair.inference))
+                result = pair.search
+                source = ", ".join(f"{k}: {v}" for k, v in result.source.items())
+                rows.append(f"| {i} | {result.id} | {source} |")
+            sections.append("\n".join(rows))
 
-        self._document = "\n".join(sections).rstrip() + "\n"
+        sections += ["## Summary", format_inference_result(self._pipeline_result.summary)]
+
+        self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
 
-    def render_search_result(self, result: BaseSearchResult) -> str:
-        return result.render_as_markdown()
-
-    def render_inference_result(self, result: BaseInferenceResult) -> str:
-        return result.render_as_markdown()
-
     def save(self, path: str) -> None:
-        """Render (if not already done) and write the result to disk."""
         if self._document is None:
             self.render()
         Path(path).write_text(self._document)
