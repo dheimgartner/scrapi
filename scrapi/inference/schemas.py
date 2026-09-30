@@ -14,5 +14,5 @@ class SummarySchema(BaseModel):
         description="Key context window paragraphs to resolve the question(s) raised."
     )
     result: str = Field(
-        description="Summary formatted as markdown across all sources in light of the prompt instruction."
+        description="Summary across all sources in light of the prompt instruction."
     )
