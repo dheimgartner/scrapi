@@ -5,15 +5,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from scrapi.renderer.base import BaseRenderer
-from scrapi.models.search_result import BaseSearchResult, WebSearchResult
-from scrapi.models.inference_result import (
-    BaseInferenceResult,
-    SearchInferenceResult,
-    SummaryInferenceResult,
-)
+from scrapi.models.search_result import WebSearchResult
+from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
 
 if TYPE_CHECKING:
     from scrapi.models.pipeline_result import PipelineResult
+    from scrapi.models.search_result import BaseSearchResult
+    from scrapi.models.inference_result import BaseInferenceResult
 
 
 @singledispatch
@@ -54,7 +52,7 @@ class MarkdownRenderer(BaseRenderer):
         sections = [
             "# Report",
             "## Summary",
-            self.render_inference_result(self._pipeline_result.summary),
+            format_inference_result(self._pipeline_result.summary),
             "## Results",
         ]
 
@@ -64,18 +62,12 @@ class MarkdownRenderer(BaseRenderer):
             for i, pair in enumerate(self._pipeline_result, start=1):
                 sections.append(f"### Result {i}")
                 sections.append("#### Search result")
-                sections.append(self.render_search_result(pair.search))
+                sections.append(format_search_result(pair.search))
                 sections.append("#### Inference result")
-                sections.append(self.render_inference_result(pair.inference))
+                sections.append(format_inference_result(pair.inference))
 
         self._document = "\n".join(sections).rstrip() + "\n"
         return self._document
-
-    def render_search_result(self, result: BaseSearchResult) -> str:
-        return format_search_result(result)
-
-    def render_inference_result(self, result: BaseInferenceResult) -> str:
-        return format_inference_result(result)
 
     def save(self, path: str) -> None:
         if self._document is None:
