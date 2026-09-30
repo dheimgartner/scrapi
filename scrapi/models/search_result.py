@@ -4,8 +4,6 @@ from datetime import datetime
 import uuid
 from typing import Any
 
-from scrapi.renderer.markdown import SearchResultMarkdownMixin, WebSearchResultMarkdownMixin
-
 
 @dataclass(frozen=True)
 class SearchStatus(ABC):
@@ -23,7 +21,7 @@ class FailedSearch(SearchStatus):
 
 
 @dataclass
-class BaseSearchResult(ABC, SearchResultMarkdownMixin):
+class BaseSearchResult(ABC):
     """Every search engine must return an object of type BaseSearchResult.
 
     Attributes:
@@ -51,5 +49,5 @@ class BaseSearchResult(ABC, SearchResultMarkdownMixin):
 
 
 @dataclass
-class WebSearchResult(BaseSearchResult, WebSearchResultMarkdownMixin):
+class WebSearchResult(BaseSearchResult):
     pass

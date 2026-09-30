@@ -5,15 +5,10 @@ import uuid
 from pydantic import BaseModel
 
 from scrapi.inference.schemas import SearchSchema, SummarySchema
-from scrapi.renderer.markdown import (
-    InferenceResultMarkdownMixin,
-    SearchInferenceResultMarkdownMixin,
-    SummaryInferenceResultMarkdownMixin,
-)
 
 
 @dataclass
-class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
+class BaseInferenceResult(ABC):
     """Every BaseSearchResult piped through an inference engine
     must yield an object of class BaseInferenceResult.
 
@@ -42,10 +37,10 @@ class BaseInferenceResult(ABC, InferenceResultMarkdownMixin):
 
 
 @dataclass
-class SearchInferenceResult(BaseInferenceResult, SearchInferenceResultMarkdownMixin):
+class SearchInferenceResult(BaseInferenceResult):
     structured_output: SearchSchema
 
 
 @dataclass
-class SummaryInferenceResult(BaseInferenceResult, SummaryInferenceResultMarkdownMixin):
+class SummaryInferenceResult(BaseInferenceResult):
     structured_output: SummarySchema

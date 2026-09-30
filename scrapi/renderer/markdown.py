@@ -1,48 +1,48 @@
 from __future__ import annotations
 
+from functools import singledispatch
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from scrapi.renderer.base import BaseRenderer
+from scrapi.models.search_result import BaseSearchResult, WebSearchResult
+from scrapi.models.inference_result import (
+    BaseInferenceResult,
+    SearchInferenceResult,
+    SummaryInferenceResult,
+)
 
 if TYPE_CHECKING:
     from scrapi.models.pipeline_result import PipelineResult
-    from scrapi.models.search_result import BaseSearchResult
-    from scrapi.models.inference_result import BaseInferenceResult
 
 
-class MarkdownRenderable:
-    def render_as_markdown(self) -> str:
-        raise NotImplementedError
+@singledispatch
+def format_search_result(result: BaseSearchResult) -> str:
+    return result.ai_content
 
 
-class SearchResultMarkdownMixin(MarkdownRenderable):
-    def render_as_markdown(self) -> str:
-        return self.ai_content
+@format_search_result.register
+def _(result: WebSearchResult) -> str:
+    url = result.source.get("url", "")
+    return f"**Source:** {url}\n\n{result.ai_content}"
 
 
-class WebSearchResultMarkdownMixin(SearchResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        url = self.source.get("url", "")
-        return f"**Source:** {url}\n\n{self.ai_content}"
+@singledispatch
+def format_inference_result(result: BaseInferenceResult) -> str:
+    return result.result
 
 
-class InferenceResultMarkdownMixin(MarkdownRenderable):
-    def render_as_markdown(self) -> str:
-        return self.result
+@format_inference_result.register
+def _(result: SearchInferenceResult) -> str:
+    return f"**Summary:** {result.structured_output.summary}\n\n**Result:** {result.structured_output.result}"
 
 
-class SearchInferenceResultMarkdownMixin(InferenceResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        return f"**Summary:** {self.structured_output.summary}\n\n**Result:** {self.structured_output.result}"
-
-
-class SummaryInferenceResultMarkdownMixin(InferenceResultMarkdownMixin):
-    def render_as_markdown(self) -> str:
-        return (
-            f"{self.structured_output.result}\n\n"
-            f"**Key passages:**\n\n{self.structured_output.paragraphs}"
-        )
+@format_inference_result.register
+def _(result: SummaryInferenceResult) -> str:
+    return (
+        f"{result.structured_output.result}\n\n"
+        f"**Key passages:**\n\n{result.structured_output.paragraphs}"
+    )
 
 
 class MarkdownRenderer(BaseRenderer):
@@ -55,7 +55,7 @@ class MarkdownRenderer(BaseRenderer):
             "# Report",
             "## Summary",
             self.render_inference_result(self._pipeline_result.summary),
-            "## Results"
+            "## Results",
         ]
 
         if len(self._pipeline_result) == 0:
@@ -72,13 +72,12 @@ class MarkdownRenderer(BaseRenderer):
         return self._document
 
     def render_search_result(self, result: BaseSearchResult) -> str:
-        return result.render_as_markdown()
+        return format_search_result(result)
 
     def render_inference_result(self, result: BaseInferenceResult) -> str:
-        return result.render_as_markdown()
+        return format_inference_result(result)
 
     def save(self, path: str) -> None:
-        """Render (if not already done) and write the result to disk."""
         if self._document is None:
             self.render()
         Path(path).write_text(self._document)

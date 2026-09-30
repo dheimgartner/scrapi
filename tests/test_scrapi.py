@@ -24,7 +24,7 @@ from scrapi.models.inference_result import (
 )
 from scrapi.inference.schemas import SearchSchema, SummarySchema
 from scrapi.models.pipeline_result import PipelineResult, ResultPair
-from scrapi.renderer.markdown import MarkdownRenderer
+from scrapi.renderer.markdown import MarkdownRenderer, format_search_result
 from scrapi.orchestrator import Orchestrator
 
 
@@ -132,7 +132,7 @@ def test_web_search_result_render_as_markdown():
         raw_content="<html>raw</html>",
         ai_content="Some article content",
     )
-    md = result.render_as_markdown()
+    md = format_search_result(result)
     assert md
     assert "https://example.com" in md
     assert "Some article content" in md
