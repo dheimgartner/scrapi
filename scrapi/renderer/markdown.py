@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from functools import singledispatch
+from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -12,23 +12,23 @@ if TYPE_CHECKING:
     from scrapi.models.inference_result import BaseInferenceResult
 
 
-@singledispatch
-def format_inference_result(result: BaseInferenceResult) -> str:
-    return result.result
-
-
-@format_inference_result.register
-def _(result: SummaryInferenceResult) -> str:
-    return (
-        f"{result.structured_output.result}\n\n"
-        f"**Key passages:**\n\n{result.structured_output.paragraphs}"
-    )
-
-
 class MarkdownRenderer(BaseRenderer):
 
     def __init__(self, pipeline_result: PipelineResult) -> None:
         super().__init__(pipeline_result)
+
+    @singledispatchmethod
+    @staticmethod
+    def format_result(result: BaseInferenceResult) -> str:
+        return result.result
+
+    @format_result.register
+    @staticmethod
+    def _(result: SummaryInferenceResult) -> str:
+        return (
+            f"{result.structured_output.result}\n\n"
+            f"**Key passages:**\n\n{result.structured_output.paragraphs}"
+        )
 
     def render(self) -> str:
         sections = ["# Scrapi report", "## Search results"]
@@ -43,7 +43,7 @@ class MarkdownRenderer(BaseRenderer):
                 rows.append(f"| {i} | {result.id} | {source} |")
             sections.append("\n".join(rows))
 
-        sections += ["## Summary", format_inference_result(self._pipeline_result.summary)]
+        sections += ["## Summary", self.format_result(self._pipeline_result.summary)]
 
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
