@@ -36,11 +36,15 @@ class MarkdownRenderer(BaseRenderer):
         if len(self._pipeline_result) == 0:
             sections.append("_No results._")
         else:
-            rows = ["| # | ID | Source |", "|---|---|---|"]
+            rows = ["| # | ID | Scraper | Status | Fetched at | Source |", "|---|---|---|---|---|---|"]
             for i, pair in enumerate(self._pipeline_result, start=1):
                 result = pair.search
                 source = ", ".join(f"{k}: {v}" for k, v in result.source.items())
-                rows.append(f"| {i} | {result.id} | {source} |")
+                status = str(result.status.status)
+                if result.status.message:
+                    status += f" {result.status.message}"
+                fetched_at = result.fetched_at.strftime("%Y-%m-%d %H:%M:%S")
+                rows.append(f"| {i} | {result.id} | {result.scraper_repr} | {status} | {fetched_at} | {source} |")
             sections.append("\n".join(rows))
 
         sections += ["## Summary", self.format_result(self._pipeline_result.summary)]
