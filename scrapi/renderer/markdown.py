@@ -13,11 +13,11 @@ if TYPE_CHECKING:
 
 
 @singledispatch
-def format_inference_result(result: BaseInferenceResult) -> str:
+def format(result: BaseInferenceResult) -> str:
     return result.result
 
 
-@format_inference_result.register
+@format.register
 def _(result: SummaryInferenceResult) -> str:
     return (
         f"{result.structured_output.result}\n\n"
@@ -43,7 +43,7 @@ class MarkdownRenderer(BaseRenderer):
                 rows.append(f"| {i} | {result.id} | {source} |")
             sections.append("\n".join(rows))
 
-        sections += ["## Summary", format_inference_result(self._pipeline_result.summary)]
+        sections += ["## Summary", format(self._pipeline_result.summary)]
 
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
