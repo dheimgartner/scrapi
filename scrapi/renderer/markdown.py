@@ -19,10 +19,10 @@ class MarkdownRenderer(BaseRenderer):
 
     @singledispatchmethod
     @staticmethod
-    def format_result(result: BaseInferenceResult) -> str:
+    def to_markdown(result: BaseInferenceResult) -> str:
         return result.result
 
-    @format_result.register
+    @to_markdown.register
     @staticmethod
     def _(result: SummaryInferenceResult) -> str:
         return (
@@ -47,7 +47,7 @@ class MarkdownRenderer(BaseRenderer):
                 rows.append(f"| {i} | {result.id} | {result.scraper_repr} | {status} | {fetched_at} | {source} |")
             sections.append("\n".join(rows))
 
-        sections += ["## Summary", self.format_result(self._pipeline_result.summary)]
+        sections += ["## Summary", self.to_markdown(self._pipeline_result.summary)]
 
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
