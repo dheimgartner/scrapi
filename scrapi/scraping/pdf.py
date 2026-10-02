@@ -1,4 +1,6 @@
+import glob
 import logging
+import os
 from datetime import datetime
 from typing import Any
 
@@ -11,21 +13,31 @@ from scrapi.models.search_result import FailedSearch, PDFSearchResult, Successfu
 class PDFScraper(bs.BaseScraper):
     """Read local PDF files and convert them to Markdown for LLM consumption.
 
-    Each path in ``query`` becomes one ``PDFSearchResult``. Tables and math are
-    preserved as best-effort Markdown/Unicode text via PyMuPDF.
+    Each entry in ``query`` may be a literal path or a glob pattern; ``~`` is
+    expanded. Tables and math are preserved as best-effort Markdown/Unicode
+    text via PyMuPDF.
     """
 
     def _fetch_content(self, query: list[str]) -> list[PDFSearchResult]:
-        """Convert each file in ``query`` to a ``PDFSearchResult``.
+        """Convert each file matched by ``query`` to a ``PDFSearchResult``.
 
         Args:
-            query: List of PDF file paths to read.
+            query: List of PDF file paths or glob patterns. ``~`` is expanded.
 
         Returns:
-            list[PDFSearchResult]: One result per input path.
+            list[PDFSearchResult]: One result per resolved file path.
         """
+        paths: list[str] = []
+        for entry in query:
+            expanded = os.path.expanduser(entry)
+            matches = glob.glob(expanded, recursive=True)
+            if matches:
+                paths.extend(sorted(matches))
+            else:
+                paths.append(expanded)
+
         results = []
-        for path in query:
+        for path in paths:
             try:
                 raw = pymupdf4llm.to_markdown(path)
                 status = SuccessfulSearch(status=200)
