@@ -1,0 +1,71 @@
+"""End-to-end pipeline tests: DummyScraper → Orchestrator → MarkdownRenderer."""
+
+from datetime import datetime
+from unittest.mock import MagicMock
+
+from scrapi.inference.schemas import SearchSchema, SummarySchema
+from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
+from scrapi.models.pipeline_result import PipelineResult
+from scrapi.orchestrator import Orchestrator
+from scrapi.renderer.markdown import MarkdownRenderer
+from scrapi.scraping.dummy import DummyScraper
+
+
+def _make_fake_search_inference() -> SearchInferenceResult:
+    return SearchInferenceResult(
+        prompted_at=datetime(2025, 1, 1),
+        system_prompt="sys",
+        task_prompt="task",
+        structured_output=SearchSchema(summary="short summary", result="finding"),
+        result="finding",
+    )
+
+
+def _make_fake_summary_inference() -> SummaryInferenceResult:
+    return SummaryInferenceResult(
+        prompted_at=datetime(2025, 1, 1),
+        system_prompt="sys",
+        task_prompt="sum",
+        structured_output=SummarySchema(
+            summary="overall summary",
+            paragraphs="key paragraphs here",
+            result="Final verdict",
+        ),
+        result="Final verdict",
+    )
+
+
+def test_pipeline_with_dummy_scraper():
+    n = 3
+    scraper = DummyScraper()
+
+    mock_search_inference = MagicMock()
+    mock_search_inference.analyse.side_effect = lambda _: _make_fake_search_inference()
+
+    mock_summary_inference = MagicMock()
+    mock_summary_inference.analyse.return_value = _make_fake_summary_inference()
+
+    orchestrator = Orchestrator(
+        scrapers=[(scraper, {"query": "test query", "n": n})],
+        search_inference=mock_search_inference,
+        summary_inference=mock_summary_inference,
+    )
+
+    assert orchestrator.result is None
+
+    pipeline_result = orchestrator.run()
+
+    assert isinstance(pipeline_result, PipelineResult)
+    assert len(pipeline_result) == n
+    assert all(pair.search.ai_content.startswith("Dummy article") for pair in pipeline_result.results)
+    assert mock_search_inference.analyse.call_count == n
+    mock_summary_inference.analyse.assert_called_once()
+    assert orchestrator.result == "Final verdict"
+
+    output = MarkdownRenderer(pipeline_result=pipeline_result).render()
+    assert isinstance(output, str)
+    assert "# Scrapi report" in output
+    assert "## Search results" in output
+    assert "dummy.example.com" in output
+    assert "## Summary" in output
+    assert "Final verdict" in output
