@@ -97,6 +97,11 @@ class FinanceScraper(bs.BaseScraper):
         def fmt_pct(v: float | None) -> str:
             return f"{v * 100:.2f}%" if v is not None else "n/a"
 
+        # yfinance returns dividendYield as a percentage value (e.g. 0.0033 = 0.33%),
+        # unlike profitMargins which is a ratio (0.27 = 27%). No ×100 here.
+        def fmt_yield(v: float | None) -> str:
+            return f"{v:.4f}%" if v is not None else "n/a"
+
         lines = [
             f"# {s.name or s.ticker} ({s.ticker})",
             "",
@@ -129,7 +134,7 @@ class FinanceScraper(bs.BaseScraper):
             "",
             "| Metric | Value |",
             "| --- | --- |",
-            f"| Dividend yield | {fmt_pct(s.dividend_yield)} |",
+            f"| Dividend yield | {fmt_yield(s.dividend_yield)} |",
             f"| Beta | {fmt_float(s.beta)} |",
             f"| Analyst target price | {fmt_float(s.analyst_target_price)} |",
             f"| Recommendation | {s.recommendation or 'n/a'} |",
