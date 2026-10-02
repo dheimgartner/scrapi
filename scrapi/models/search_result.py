@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
 import uuid
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from scrapi.models.financial_snapshot import FinancialSnapshot
 
 
 @dataclass(frozen=True)
@@ -56,3 +61,8 @@ class WebSearchResult(BaseSearchResult):
 @dataclass
 class FileSearchResult(BaseSearchResult):
     pass
+
+
+@dataclass
+class FinanceSearchResult(BaseSearchResult):
+    raw_content: FinancialSnapshot
