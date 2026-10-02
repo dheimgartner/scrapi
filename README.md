@@ -26,18 +26,23 @@ azure_endpoint = "https://<your-resource>.openai.azure.com/"
 model = "gpt-4.1"
 
 [inference.search]
-system_prompt = "You are a helpful research analyst."
-task_prompt = "Summarize the key findings from the article relevant to the query."
+system_prompt = "You are a financial research analyst."
+task_prompt = "Extract the key facts and sentiment from this source relevant to the company's earnings outlook."
 
 [inference.summary]
-system_prompt = "You are a helpful research analyst."
-task_prompt = "Based on all sources, provide a concise final summary. Cite your sources."
+system_prompt = "You are a financial research analyst."
+task_prompt = "Based on all sources, summarise the company's earnings situation and outlook. Cite your sources."
 
 [[scrapers]]
 provider = "yahoo"
 [scrapers.fetch]
-query = "latest AI research breakthroughs"
+query = "Apple Q2 2025 earnings"
 n = 5
+
+[[scrapers]]
+provider = "finance"
+[scrapers.fetch]
+query = ["AAPL"]
 ```
 
 Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks.
@@ -88,16 +93,17 @@ config = parse_config({
     },
     "inference": {
         "search": {
-            "system_prompt": "You are a helpful research analyst.",
-            "task_prompt": "Summarize the key findings from the article relevant to the query.",
+            "system_prompt": "You are a financial research analyst.",
+            "task_prompt": "Extract the key facts and sentiment from this source relevant to the company's earnings outlook.",
         },
         "summary": {
-            "system_prompt": "You are a helpful research analyst.",
-            "task_prompt": "Provide a concise final summary. Cite your sources.",
+            "system_prompt": "You are a financial research analyst.",
+            "task_prompt": "Summarise the company's earnings situation and outlook. Cite your sources.",
         },
     },
     "scrapers": [
-        {"provider": "yahoo", "fetch": {"query": "latest AI research breakthroughs", "n": 5}},
+        {"provider": "yahoo", "fetch": {"query": "Apple Q2 2025 earnings", "n": 5}},
+        {"provider": "finance", "fetch": {"query": ["AAPL"]}},
     ],
 })
 
