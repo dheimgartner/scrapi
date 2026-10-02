@@ -1,5 +1,6 @@
 from scrapi.scraping.yahoo import YahooScraper
 from scrapi.scraping.dummy import DummyScraper
+from scrapi.scraping.pdf import PDFScraper
 from scrapi.config.loader import parse_config
 from scrapi.factory import make_orchestrator
 
@@ -10,6 +11,15 @@ results = scraper.fetch_content(query="Sergio Ermotti UBS", n=2)
 for result in results:
     print(result.source["url"])
     print(result.ai_content)
+    print("---")
+
+# --- PDFScraper: local PDF files to markdown ---
+scraper = PDFScraper()
+results = scraper.fetch_content(query=["path/to/paper1.pdf", "path/to/paper2.pdf"])
+
+for result in results:
+    print(result.source["path"])
+    print(result.ai_content[:500])
     print("---")
 
 # --- YahooScraper: live web search ---
