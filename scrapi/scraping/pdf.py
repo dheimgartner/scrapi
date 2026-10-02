@@ -1,7 +1,7 @@
 import glob
 import logging
-import os
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pymupdf4llm
@@ -29,8 +29,8 @@ class PDFScraper(bs.BaseScraper):
         """
         paths: list[str] = []
         for entry in query:
-            expanded = os.path.expanduser(entry)
-            matches = glob.glob(expanded, recursive=True)
+            expanded = Path(entry).expanduser()
+            matches = glob.glob(str(expanded), recursive=True)
             if matches:
                 paths.extend(sorted(matches))
             else:
