@@ -1,6 +1,6 @@
 from scrapi.scraping.yahoo import YahooScraper
 from scrapi.scraping.dummy import DummyScraper
-from scrapi.scraping.pdf import PDFScraper
+from scrapi.scraping.file import FileScraper
 from scrapi.config.loader import parse_config
 from scrapi.factory import make_orchestrator
 
@@ -13,8 +13,8 @@ for result in results:
     print(result.ai_content)
     print("---")
 
-# --- PDFScraper: local PDF files to markdown ---
-scraper = PDFScraper()
+# --- FileScraper: local files to markdown ---
+scraper = FileScraper()
 results = scraper.fetch_content(query=["path/to/paper1.pdf", "path/to/paper2.pdf"])
 
 for result in results:

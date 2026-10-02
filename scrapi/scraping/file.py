@@ -5,28 +5,21 @@ from pathlib import Path
 from typing import Any
 
 import pymupdf4llm
+from markitdown import MarkItDown
 
 import scrapi.scraping.base as bs
-from scrapi.models.search_result import FailedSearch, PDFSearchResult, SuccessfulSearch
+from scrapi.models.search_result import FailedSearch, FileSearchResult, SuccessfulSearch
 
 
-class PDFScraper(bs.BaseScraper):
-    """Read local PDF files and convert them to Markdown for LLM consumption.
+class FileScraper(bs.BaseScraper):
+    """Read local files and convert them to Markdown for LLM consumption.
 
     Each entry in ``query`` may be a literal path or a glob pattern; ``~`` is
-    expanded. Tables and math are preserved as best-effort Markdown/Unicode
-    text via PyMuPDF.
+    expanded. PDF files are processed via PyMuPDF for faithful table and math
+    rendering; all other formats are handled by MarkItDown.
     """
 
-    def _fetch_content(self, query: list[str]) -> list[PDFSearchResult]:
-        """Convert each file matched by ``query`` to a ``PDFSearchResult``.
-
-        Args:
-            query: List of PDF file paths or glob patterns. ``~`` is expanded.
-
-        Returns:
-            list[PDFSearchResult]: One result per resolved file path.
-        """
+    def _fetch_content(self, query: list[str]) -> list[FileSearchResult]:
         paths: list[str] = []
         for entry in query:
             expanded = Path(entry).expanduser()
@@ -34,19 +27,22 @@ class PDFScraper(bs.BaseScraper):
             if matches:
                 paths.extend(sorted(matches))
             else:
-                paths.append(expanded)
+                paths.append(str(expanded))
 
         results = []
         for path in paths:
             try:
-                raw = pymupdf4llm.to_markdown(path)
+                if Path(path).suffix.lower() == ".pdf":
+                    raw = pymupdf4llm.to_markdown(path)
+                else:
+                    raw = MarkItDown().convert(path).text_content
                 status = SuccessfulSearch(status=200)
             except Exception as e:
-                logging.warning("PDFScraper failed to read %s: %s", path, e)
+                logging.warning("FileScraper failed to read %s: %s", path, e)
                 raw = ""
                 status = FailedSearch(status=0, message=str(e), error=e)
             results.append(
-                PDFSearchResult(
+                FileSearchResult(
                     scraper_repr=repr(self),
                     status=status,
                     fetched_at=datetime.now(),
