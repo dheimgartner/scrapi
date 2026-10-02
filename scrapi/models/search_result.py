@@ -12,16 +12,25 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class SearchStatus(ABC):
+    """Base class for fetch status codes."""
+
     status: int
     message: str | None = None
 
 
 @dataclass(frozen=True)
-class SuccessfulSearch(SearchStatus): ...
+class SuccessfulSearch(SearchStatus):
+    """Indicates a successful fetch (HTTP 200 or equivalent)."""
 
 
 @dataclass(frozen=True)
 class FailedSearch(SearchStatus):
+    """Indicates a failed fetch.
+
+    Attributes:
+        error: The exception that caused the failure, if any.
+    """
+
     error: Exception | None = None
 
 
@@ -55,14 +64,20 @@ class BaseSearchResult(ABC):
 
 @dataclass
 class WebSearchResult(BaseSearchResult):
-    pass
+    """Search result from a web-based scraper."""
 
 
 @dataclass
 class FileSearchResult(BaseSearchResult):
-    pass
+    """Search result from a local file scraper."""
 
 
 @dataclass
 class FinanceSearchResult(BaseSearchResult):
+    """Search result from the finance scraper.
+
+    Unlike other result types, ``raw_content`` is a ``FinancialSnapshot``
+    instead of a raw string.
+    """
+
     raw_content: FinancialSnapshot

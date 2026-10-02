@@ -38,9 +38,13 @@ class BaseInferenceResult(ABC):
 
 @dataclass
 class SearchInferenceResult(BaseInferenceResult):
+    """Inference result for a single search result analysis."""
+
     structured_output: SearchSchema
 
 
 @dataclass
 class SummaryInferenceResult(BaseInferenceResult):
+    """Inference result for the final cross-source summary."""
+
     structured_output: SummarySchema
