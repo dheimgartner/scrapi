@@ -1,4 +1,4 @@
-import yaml
+import tomllib
 from pathlib import Path
 
 from scrapi.exceptions import ConfigLoadError
@@ -47,28 +47,22 @@ def parse_config(source: dict) -> ScrapiConfig:
     )
 
 
-def load_yaml_config(path: Path) -> ScrapiConfig:
-    """Loads a scrapi config from a YAML file.
+def load_toml_config(path: Path) -> ScrapiConfig:
+    """Loads a scrapi config from a TOML file.
 
     Args:
-        path: Path to the YAML config file to load.
+        path: Path to the TOML config file to load.
 
     Returns:
         The parsed and validated scrapi configuration.
 
     Raises:
-        ConfigLoadError: If the file's content is not valid YAML, or if
-            the parsed YAML is not a mapping (dict).
+        ConfigLoadError: If the file's content is not valid TOML.
     """
     try:
-        with open(path, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-    except yaml.YAMLError as e:
-        raise ConfigLoadError(f"Failed to parse YAML config at {path}: {e}") from e
-
-    if not isinstance(data, dict):
-        raise ConfigLoadError(
-            f"Config at {path} must be a YAML mapping, got {type(data).__name__}"
-        )
+        with open(path, "rb") as f:
+            data = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        raise ConfigLoadError(f"Failed to parse TOML config at {path}: {e}") from e
 
     return parse_config(data)
