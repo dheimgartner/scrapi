@@ -23,16 +23,13 @@ class BaseScraper(ABC):
     """
 
     @abstractmethod
-    def _fetch_content(self, query: str, n: int) -> list[BaseSearchResult]:
-        """Retrieve content matching a query.
+    def _fetch_content(self, *args, **kwargs) -> list[BaseSearchResult]:
+        """Retrieve content.
 
         Implementations are responsible for executing the query against
         their respective data source, collecting the results, and
-        returning them as search results.
-
-        Args:
-            query (str): Query used to retrieve content.
-            n (int): Maximum number of results to return.
+        returning them as search results. Each subclass defines its own
+        parameter signature.
 
         Returns:
             list[BaseSearchResult]: Retrieved content represented as
@@ -40,14 +37,14 @@ class BaseScraper(ABC):
         """
         pass
 
-    def fetch_content(self, query: str, n: int) -> list[BaseSearchResult]:
+    def fetch_content(self, *args, **kwargs) -> list[BaseSearchResult]:
         """Retrieve content, raising ``NoResultsFoundError`` on failure.
 
         Wraps ``_fetch_content`` and raises if the result is empty or if
         the underlying implementation raises any exception.
         """
         try:
-            results = self._fetch_content(query, n)
+            results = self._fetch_content(*args, **kwargs)
         except Exception as e:
             raise NoResultsFoundError("No results found") from e
         if not results:

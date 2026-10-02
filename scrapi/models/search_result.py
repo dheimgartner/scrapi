@@ -51,3 +51,8 @@ class BaseSearchResult(ABC):
 @dataclass
 class WebSearchResult(BaseSearchResult):
     pass
+
+
+@dataclass
+class FileSearchResult(BaseSearchResult):
+    pass
