@@ -1,14 +1,14 @@
 # scrapi
 
-Scrape the web and analyse the results with an LLM. Built for conflict-of-interest checks: given a search query, `scrapi` fetches content from one or more sources, runs per-result inference, then produces a final summary verdict.
+Fetch an information set from multiple sources and analyse it with an LLM. `scrapi` collects content from one or more scrapers, runs structured per-result inference, then produces a final summary.
 
 ## Installation
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo-url>
-cd <repo>
+git clone git@github.com:dheimgartner/scrapi.git
+cd scrapi
 uv sync
 source .venv/bin/activate
 ```
@@ -26,17 +26,17 @@ azure_endpoint = "https://<your-resource>.openai.azure.com/"
 model = "gpt-4.1"
 
 [inference.search]
-system_prompt = "You are a legal analyst."
-task_prompt = "Evaluate whether the candidate has a conflict of interest based on the article."
+system_prompt = "You are a helpful research analyst."
+task_prompt = "Summarize the key findings from the article relevant to the query."
 
 [inference.summary]
-system_prompt = "You are a legal analyst."
-task_prompt = "Based on all sources, give a final verdict. Cite your sources."
+system_prompt = "You are a helpful research analyst."
+task_prompt = "Based on all sources, provide a concise final summary. Cite your sources."
 
 [[scrapers]]
 provider = "yahoo"
 [scrapers.fetch]
-query = "Sergio Ermotti AND UBS"
+query = "latest AI research breakthroughs"
 n = 5
 ```
 
@@ -88,16 +88,16 @@ config = parse_config({
     },
     "inference": {
         "search": {
-            "system_prompt": "You are a legal analyst.",
-            "task_prompt": "Evaluate whether the candidate has a conflict of interest.",
+            "system_prompt": "You are a helpful research analyst.",
+            "task_prompt": "Summarize the key findings from the article relevant to the query.",
         },
         "summary": {
-            "system_prompt": "You are a legal analyst.",
-            "task_prompt": "Give a final verdict. Cite your sources.",
+            "system_prompt": "You are a helpful research analyst.",
+            "task_prompt": "Provide a concise final summary. Cite your sources.",
         },
     },
     "scrapers": [
-        {"provider": "yahoo", "fetch": {"query": "Sergio Ermotti AND UBS", "n": 5}},
+        {"provider": "yahoo", "fetch": {"query": "latest AI research breakthroughs", "n": 5}},
     ],
 })
 
