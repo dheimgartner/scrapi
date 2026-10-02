@@ -1,6 +1,6 @@
 # scrapi
 
-Scrape the web and analyse the results with an LLM. Built for conflict-of-interest checks: given a search query, `scrapi` fetches pages, runs per-result inference, then produces a final summary verdict.
+Scrape the web and analyse the results with an LLM. Built for conflict-of-interest checks: given a search query, `scrapi` fetches content from one or more sources, runs per-result inference, then produces a final summary verdict.
 
 ## Installation
 
@@ -15,92 +15,111 @@ source .venv/bin/activate
 
 ## Configuration
 
-`scrapi` is configured with a YAML file. The three top-level keys are `scraper`, `inference`, and `orchestrator`.
+`scrapi` is configured with a TOML file. The three top-level sections are `[llm]`, `[inference]`, and `[[scrapers]]`.
 
-```yaml
-# config.yaml
-scraper:
-  provider: yahoo
-  config: {}
+```toml
+[llm]
+provider = "openai"
 
-inference:
-  provider: openai
-  config:
-    azure_endpoint: https://<your-resource>.openai.azure.com/
-    api_version: "2024-12-01-preview"
-    model: gpt-4.1
+[llm.config]
+azure_endpoint = "https://<your-resource>.openai.azure.com/"
+model = "gpt-4.1"
 
-orchestrator:
-  config:
-    system_prompt: |
-      You are a legal analyst investigating whether a candidate is independent
-      from the party it would oversee.
-    task_prompt: |
-      Given the information, evaluate whether the candidate is independent.
-    summary_prompt: |
-      Based on all context, give a final verdict on whether the candidate
-      should receive the mandate. Cite your sources.
-    query: "Sergio Ermotti AND UBS"
-    n: 5
+[inference.search]
+system_prompt = "You are a legal analyst."
+task_prompt = "Evaluate whether the candidate has a conflict of interest based on the article."
+
+[inference.summary]
+system_prompt = "You are a legal analyst."
+task_prompt = "Based on all sources, give a final verdict. Cite your sources."
+
+[[scrapers]]
+provider = "yahoo"
+[scrapers.fetch]
+query = "Sergio Ermotti AND UBS"
+n = 5
 ```
 
-**Providers**
+Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks.
 
-| Key | Providers |
+**LLM providers**
+
+| Provider | Config keys |
 |---|---|
-| `scraper` | `yahoo` |
-| `inference` | `openai` (Azure OpenAI) |
+| `openai` | `azure_endpoint`, `api_version`, `model`, `api_key` |
+| `ollama` | `base_url`, `model` |
+
+**Scraper providers**
+
+| Provider | `fetch` keys | Description |
+|---|---|---|
+| `yahoo` | `query` (str), `n` (int) | Yahoo web search via DDGS + Selenium |
+| `file` | `query` (list of paths/globs) | Local files; PDFs and common document formats |
+| `finance` | `query` (list of ticker symbols) | Financial data via yfinance |
+| `dummy` | `query` (str), `n` (int) | Synthetic results for testing |
 
 **Environment variables**
 
 | Variable | Purpose |
 |---|---|
-| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI (used by the `openai` provider) |
+| `AZURE_OPENAI_API_KEY` | API key for the `openai` provider (can also be set in `[llm.config]`) |
 
 ## Usage
 
 ```python
 import scrapi
 
-config = scrapi.load_yaml_config("config.yaml")
+config = scrapi.load_toml_config("config.toml")
 orchestrator = scrapi.make_orchestrator(config)
-report = orchestrator.run()
+result = orchestrator.run()
 
-print(report.summary.result)
+print(result.summary.result)
 ```
 
-Build a config programmatically instead of from a file:
+Build a config programmatically:
 
 ```python
 from scrapi import parse_config, make_orchestrator
 
 config = parse_config({
-    "scraper": {"provider": "yahoo", "config": {}},
-    "inference": {
+    "llm": {
         "provider": "openai",
         "config": {"azure_endpoint": "https://...", "model": "gpt-4.1"},
     },
-    "orchestrator": {
-        "config": {
-            "system_prompt": "...",
-            "task_prompt": "...",
-            "summary_prompt": "...",
-            "query": "Sergio Ermotti AND UBS",
-            "n": 5,
-        }
+    "inference": {
+        "search": {
+            "system_prompt": "You are a legal analyst.",
+            "task_prompt": "Evaluate whether the candidate has a conflict of interest.",
+        },
+        "summary": {
+            "system_prompt": "You are a legal analyst.",
+            "task_prompt": "Give a final verdict. Cite your sources.",
+        },
     },
+    "scrapers": [
+        {"provider": "yahoo", "fetch": {"query": "Sergio Ermotti AND UBS", "n": 5}},
+    ],
 })
 
 orchestrator = make_orchestrator(config)
-report = orchestrator.run()
+result = orchestrator.run()
 ```
 
-The returned `Report` contains individual result pairs (search result + inference result) and a final summary:
+The returned `PipelineResult` contains individual result pairs (search result + inference result) and a final summary:
 
 ```python
-for pair in report:
-    print(pair.search.source)        # source URL / metadata
-    print(pair.inference.result)     # per-article verdict
+for pair in result:
+    print(pair.search.source)       # source URL / path / ticker
+    print(pair.inference.result)    # per-source verdict
 
-print(report.summary.result)        # final aggregated verdict
+print(result.summary.result)       # final aggregated verdict
+```
+
+### Rendering
+
+```python
+from scrapi.renderer.markdown import MarkdownRenderer
+
+renderer = MarkdownRenderer(result)
+renderer.save("report.md")
 ```
