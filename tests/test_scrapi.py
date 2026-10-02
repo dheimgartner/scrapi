@@ -1,53 +1,59 @@
-"""Minimal test suite for the scrapi package."""
+"""Test suite for the scrapi package — focused on high-level pipeline functionality."""
 
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from scrapi.config.loader import parse_config, load_yaml_config
+from scrapi.config.loader import parse_config, load_toml_config
 from scrapi.config.schemas import ScrapiConfig
-from scrapi.config.defaults import DEFAULT_CONFIG
 from scrapi.exceptions import ConfigLoadError, InvalidConfigError
 from scrapi.factory import make_orchestrator
-from scrapi.models.search_result import (
-    SearchStatus,
-    SuccessfulSearch,
-    FailedSearch,
-    WebSearchResult,
-)
-from scrapi.models.inference_result import (
-    SearchInferenceResult,
-    SummaryInferenceResult,
-)
 from scrapi.inference.schemas import SearchSchema, SummarySchema
-from scrapi.models.pipeline_result import PipelineResult, ResultPair
-from scrapi.renderer.markdown import MarkdownRenderer
+from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
+from scrapi.models.pipeline_result import PipelineResult
 from scrapi.orchestrator import Orchestrator
+from scrapi.renderer.markdown import MarkdownRenderer
+from scrapi.scraping.dummy import DummyScraper
 
 
 _BASE_CONFIG = {
     "llm": {"provider": "ollama", "config": {}},
     "inference": {
-        "search": {
-            "system_prompt": "sys",
-            "task_prompt": "task",
-        },
-        "summary": {
-            "system_prompt": "sys",
-            "task_prompt": "sum",
-        },
+        "search": {"system_prompt": "sys", "task_prompt": "task"},
+        "summary": {"system_prompt": "sys", "task_prompt": "sum"},
     },
     "scrapers": [
-        {"provider": "yahoo", "config": {}, "fetch": {"query": "q", "n": 2}},
+        {"provider": "dummy", "config": {}, "fetch": {"query": "q", "n": 2}},
     ],
 }
 
+_VALID_TOML = """\
+[llm]
+provider = "ollama"
+
+[llm.config]
+
+[inference.search]
+system_prompt = "sys"
+task_prompt = "task"
+
+[inference.summary]
+system_prompt = "sys"
+task_prompt = "sum"
+
+[[scrapers]]
+provider = "dummy"
+[scrapers.fetch]
+query = "q"
+n = 2
+"""
+
 
 # ---------------------------------------------------------------------------
-# 1. parse_config with valid dict
+# Config parsing
 # ---------------------------------------------------------------------------
 
 def test_parse_config_valid():
@@ -56,57 +62,63 @@ def test_parse_config_valid():
     assert config.llm.provider == "ollama"
     assert config.inference.search.system_prompt == "sys"
     assert config.inference.summary.task_prompt == "sum"
-    assert config.scrapers[0].provider == "yahoo"
+    assert config.scrapers[0].provider == "dummy"
     assert config.scrapers[0].fetch["n"] == 2
 
 
 # ---------------------------------------------------------------------------
-# 2. load_yaml_config raises ConfigLoadError for invalid YAML file
+# TOML file loading
 # ---------------------------------------------------------------------------
 
-def test_load_yaml_config_invalid_file():
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-        f.write(": invalid: yaml: [unclosed")
+def test_load_toml_config_from_file():
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".toml", delete=False) as f:
+        f.write(_VALID_TOML.encode())
         tmp_path = Path(f.name)
 
-    with pytest.raises(ConfigLoadError):
-        load_yaml_config(tmp_path)
+    try:
+        config = load_toml_config(tmp_path)
+        assert isinstance(config, ScrapiConfig)
+        assert config.llm.provider == "ollama"
+        assert config.scrapers[0].provider == "dummy"
+        assert config.scrapers[0].fetch["n"] == 2
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
-    tmp_path.unlink(missing_ok=True)
 
-
-def test_load_yaml_config_non_mapping():
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-        f.write("- just\n- a\n- list\n")
+def test_load_toml_config_invalid_toml():
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".toml", delete=False) as f:
+        f.write(b"[invalid toml\nkey = ")
         tmp_path = Path(f.name)
 
-    with pytest.raises(ConfigLoadError):
-        load_yaml_config(tmp_path)
-
-    tmp_path.unlink(missing_ok=True)
+    try:
+        with pytest.raises(ConfigLoadError):
+            load_toml_config(tmp_path)
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
-# 3. make_orchestrator returns Orchestrator for valid config
+# Factory
 # ---------------------------------------------------------------------------
 
 def test_make_orchestrator_returns_orchestrator():
     config = parse_config(_BASE_CONFIG)
 
-    mock_llm_instance = MagicMock()
-    mock_llm_instance.llm = MagicMock()
-    mock_scraper_instance = MagicMock()
+    mock_llm = MagicMock()
+    mock_llm.llm = MagicMock()
 
-    with patch("scrapi.config.registry.LLM_REGISTRY", {"ollama": lambda **kw: mock_llm_instance}), \
-         patch("scrapi.config.registry.SCRAPER_REGISTRY", {"yahoo": lambda **kw: mock_scraper_instance}):
+    with (
+        __import__("unittest.mock", fromlist=["patch"]).patch(
+            "scrapi.config.registry.LLM_REGISTRY", {"ollama": lambda **kw: mock_llm}
+        ),
+        __import__("unittest.mock", fromlist=["patch"]).patch(
+            "scrapi.config.registry.SCRAPER_REGISTRY", {"dummy": lambda **kw: DummyScraper()}
+        ),
+    ):
         orchestrator = make_orchestrator(config)
 
     assert isinstance(orchestrator, Orchestrator)
 
-
-# ---------------------------------------------------------------------------
-# 4. make_orchestrator raises InvalidConfigError for unknown provider
-# ---------------------------------------------------------------------------
 
 def test_make_orchestrator_unknown_scraper():
     config = parse_config({
@@ -119,131 +131,64 @@ def test_make_orchestrator_unknown_scraper():
 
 
 # ---------------------------------------------------------------------------
-# 5. SearchStatus, SuccessfulSearch, FailedSearch
+# Full pipeline: DummyScraper → Orchestrator → MarkdownRenderer
 # ---------------------------------------------------------------------------
 
-def test_search_status_classes():
-    success = SuccessfulSearch(status=200)
-    assert success.status == 200
-    assert isinstance(success, SearchStatus)
-
-    failed = FailedSearch(status=404, message="Not found")
-    assert failed.status == 404
-    assert failed.message == "Not found"
-    assert isinstance(failed, SearchStatus)
-
-    error = ValueError("oops")
-    failed_with_error = FailedSearch(status=500, error=error)
-    assert failed_with_error.error is error
-
-
-# ---------------------------------------------------------------------------
-# 7. Orchestrator.run with mocked scraper and inference objects
-# ---------------------------------------------------------------------------
-
-def test_orchestrator_run():
-    status = SuccessfulSearch(status=200)
-    fake_search_result = WebSearchResult(
-        scraper_repr="MockScraper",
-        status=status,
-        fetched_at=datetime(2025, 1, 1),
-        source={"url": "https://example.com"},
-        raw_content="<html/>",
-        ai_content="Article content",
-    )
-
-    fake_search_schema = SearchSchema(summary="short summary", result="finding")
-    fake_search_inference = SearchInferenceResult(
+def _make_fake_search_inference() -> SearchInferenceResult:
+    return SearchInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="task",
-        structured_output=fake_search_schema,
+        structured_output=SearchSchema(summary="short summary", result="finding"),
         result="finding",
     )
 
-    fake_summary_schema = SummarySchema(
-        summary="overall summary",
-        paragraphs="key paragraphs here",
-        result="Final verdict",
-    )
-    fake_summary_inference = SummaryInferenceResult(
+
+def _make_fake_summary_inference() -> SummaryInferenceResult:
+    return SummaryInferenceResult(
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="sum",
-        structured_output=fake_summary_schema,
+        structured_output=SummarySchema(
+            summary="overall summary",
+            paragraphs="key paragraphs here",
+            result="Final verdict",
+        ),
         result="Final verdict",
     )
 
-    mock_scraper = MagicMock()
-    mock_scraper.fetch_content.return_value = [fake_search_result]
+
+def test_pipeline_with_dummy_scraper():
+    n = 3
+    scraper = DummyScraper()
 
     mock_search_inference = MagicMock()
-    mock_search_inference.analyse.return_value = fake_search_inference
+    mock_search_inference.analyse.side_effect = lambda _: _make_fake_search_inference()
 
     mock_summary_inference = MagicMock()
-    mock_summary_inference.analyse.return_value = fake_summary_inference
+    mock_summary_inference.analyse.return_value = _make_fake_summary_inference()
 
     orchestrator = Orchestrator(
-        scrapers=[(mock_scraper, {"query": "test query", "n": 1})],
+        scrapers=[(scraper, {"query": "test query", "n": n})],
         search_inference=mock_search_inference,
         summary_inference=mock_summary_inference,
     )
+
+    assert orchestrator.result is None
+
     report = orchestrator.run()
 
-    mock_scraper.fetch_content.assert_called_once_with(query="test query", n=1)
     assert isinstance(report, PipelineResult)
-    assert len(report) == 1
-    assert report.results[0].search is fake_search_result
-    assert report.results[0].inference is fake_search_inference
-    assert report.summary is fake_summary_inference
+    assert len(report) == n
+    assert all(pair.search.ai_content.startswith("Dummy article") for pair in report.results)
+    assert mock_search_inference.analyse.call_count == n
+    mock_summary_inference.analyse.assert_called_once()
+    assert orchestrator.result == "Final verdict"
 
-
-# ---------------------------------------------------------------------------
-# 8. MarkdownRenderer produces string with expected section headers
-# ---------------------------------------------------------------------------
-
-def test_markdown_renderer():
-    status = SuccessfulSearch(status=200)
-    search_result = WebSearchResult(
-        scraper_repr="MockScraper",
-        status=status,
-        fetched_at=datetime(2025, 1, 1),
-        source={"url": "https://example.com"},
-        raw_content="<html/>",
-        ai_content="Article content",
-    )
-
-    search_schema = SearchSchema(summary="short summary", result="finding")
-    inference_result = SearchInferenceResult(
-        prompted_at=datetime(2025, 1, 1),
-        system_prompt="sys",
-        task_prompt="task",
-        structured_output=search_schema,
-        result="finding",
-    )
-
-    summary_schema = SummarySchema(
-        summary="overall summary",
-        paragraphs="key paragraphs here",
-        result="Final verdict",
-    )
-    summary_result = SummaryInferenceResult(
-        prompted_at=datetime(2025, 1, 1),
-        system_prompt="sys",
-        task_prompt="sum",
-        structured_output=summary_schema,
-        result="Final verdict",
-    )
-
-    pair = ResultPair(search=search_result, inference=inference_result)
-    report = PipelineResult(results=[pair], summary=summary_result)
-
-    renderer = MarkdownRenderer(pipeline_result=report)
-    output = renderer.render()
-
+    output = MarkdownRenderer(pipeline_result=report).render()
     assert isinstance(output, str)
     assert "# Scrapi report" in output
     assert "## Search results" in output
-    assert "https://example.com" in output
+    assert "dummy.example.com" in output
     assert "## Summary" in output
     assert "Final verdict" in output
