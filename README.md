@@ -27,16 +27,16 @@ model = "gpt-4.1"
 
 [inference.search]
 system_prompt = "You are a financial research analyst."
-task_prompt = "Extract the key facts and sentiment from this source relevant to the company's earnings outlook."
+task_prompt = "Extract the key facts and sentiment from this source relevant to the company's situation and outlook."
 
 [inference.summary]
 system_prompt = "You are a financial research analyst."
-task_prompt = "Based on all sources, summarise the company's earnings situation and outlook. Cite your sources."
+task_prompt = "Based on all sources, summarise the company's current situation and outlook. Cite your sources."
 
 [[scrapers]]
 provider = "yahoo"
 [scrapers.fetch]
-query = "Apple Q2 2025 earnings"
+query = "Apple latest company news"
 n = 5
 
 [[scrapers]]
@@ -102,7 +102,7 @@ config = parse_config({
         },
     },
     "scrapers": [
-        {"provider": "yahoo", "fetch": {"query": "Apple Q2 2025 earnings", "n": 5}},
+        {"provider": "yahoo", "fetch": {"query": "Apple latest company news", "n": 5}},
         {"provider": "finance", "fetch": {"query": ["AAPL"]}},
     ],
 })
