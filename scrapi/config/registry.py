@@ -7,7 +7,7 @@ Used by the config parsing/factory code to resolve a provider string
 from scrapi.llm.ollama import OllamaLLM
 from scrapi.llm.openai import OpenaiLLM
 from scrapi.scraping.dummy import DummyScraper
-from scrapi.scraping.pdf import PDFScraper
+from scrapi.scraping.file import FileScraper
 from scrapi.scraping.yahoo import YahooScraper
 
 LLM_REGISTRY = {
@@ -17,6 +17,6 @@ LLM_REGISTRY = {
 
 SCRAPER_REGISTRY = {
     "dummy": DummyScraper,
-    "pdf": PDFScraper,
+    "file": FileScraper,
     "yahoo": YahooScraper,
 }
