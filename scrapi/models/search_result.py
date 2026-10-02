@@ -54,5 +54,5 @@ class WebSearchResult(BaseSearchResult):
 
 
 @dataclass
-class FileSearchResult(BaseSearchResult):
+class PDFSearchResult(BaseSearchResult):
     pass

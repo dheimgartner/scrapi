@@ -5,25 +5,24 @@ from typing import Any
 import pymupdf4llm
 
 import scrapi.scraping.base as bs
-from scrapi.models.search_result import FailedSearch, FileSearchResult, SuccessfulSearch
+from scrapi.models.search_result import FailedSearch, PDFSearchResult, SuccessfulSearch
 
 
-class FileScraper(bs.BaseScraper):
-    """Read local files and convert them to Markdown for LLM consumption.
+class PDFScraper(bs.BaseScraper):
+    """Read local PDF files and convert them to Markdown for LLM consumption.
 
-    Each path in ``query`` becomes one ``FileSearchResult``. Supports any
-    format handled by PyMuPDF (PDF, DOCX, EPUB, …); tables and math are
-    preserved as best-effort Markdown/Unicode text.
+    Each path in ``query`` becomes one ``PDFSearchResult``. Tables and math are
+    preserved as best-effort Markdown/Unicode text via PyMuPDF.
     """
 
-    def _fetch_content(self, query: list[str]) -> list[FileSearchResult]:
-        """Convert each file in ``query`` to a ``FileSearchResult``.
+    def _fetch_content(self, query: list[str]) -> list[PDFSearchResult]:
+        """Convert each file in ``query`` to a ``PDFSearchResult``.
 
         Args:
-            query: List of file paths to read.
+            query: List of PDF file paths to read.
 
         Returns:
-            list[FileSearchResult]: One result per input path.
+            list[PDFSearchResult]: One result per input path.
         """
         results = []
         for path in query:
@@ -31,11 +30,11 @@ class FileScraper(bs.BaseScraper):
                 raw = pymupdf4llm.to_markdown(path)
                 status = SuccessfulSearch(status=200)
             except Exception as e:
-                logging.warning("FileScraper failed to read %s: %s", path, e)
+                logging.warning("PDFScraper failed to read %s: %s", path, e)
                 raw = ""
                 status = FailedSearch(status=0, message=str(e), error=e)
             results.append(
-                FileSearchResult(
+                PDFSearchResult(
                     scraper_repr=repr(self),
                     status=status,
                     fetched_at=datetime.now(),
