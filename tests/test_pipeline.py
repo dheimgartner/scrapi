@@ -53,16 +53,16 @@ def test_pipeline_with_dummy_scraper():
 
     assert orchestrator.result is None
 
-    report = orchestrator.run()
+    pipeline_result = orchestrator.run()
 
-    assert isinstance(report, PipelineResult)
-    assert len(report) == n
-    assert all(pair.search.ai_content.startswith("Dummy article") for pair in report.results)
+    assert isinstance(pipeline_result, PipelineResult)
+    assert len(pipeline_result) == n
+    assert all(pair.search.ai_content.startswith("Dummy article") for pair in pipeline_result.results)
     assert mock_search_inference.analyse.call_count == n
     mock_summary_inference.analyse.assert_called_once()
     assert orchestrator.result == "Final verdict"
 
-    output = MarkdownRenderer(pipeline_result=report).render()
+    output = MarkdownRenderer(pipeline_result=pipeline_result).render()
     assert isinstance(output, str)
     assert "# Scrapi report" in output
     assert "## Search results" in output
