@@ -56,3 +56,8 @@ class WebSearchResult(BaseSearchResult):
 @dataclass
 class FileSearchResult(BaseSearchResult):
     pass
+
+
+@dataclass
+class FinanceSearchResult(BaseSearchResult):
+    pass

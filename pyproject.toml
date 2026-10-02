@@ -30,6 +30,7 @@ dependencies = [
     "SQLAlchemy",
     "tqdm",
     "truststore",
+    "yfinance",
 ]
 
 [project.optional-dependencies]
