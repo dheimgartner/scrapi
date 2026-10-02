@@ -1,0 +1,34 @@
+[llm]
+provider = "openai"
+
+[llm.config]
+
+[inference.search]
+system_prompt = "You are a helpful research analyst."
+task_prompt = "Given the information, summarize the key findings relevant to the query."
+
+[inference.summary]
+system_prompt = "You are a helpful research analyst."
+task_prompt = "Based on all sources, provide a concise final summary. Cite your sources."
+
+[[scrapers]]
+provider = "dummy"
+[scrapers.fetch]
+query = "example query"
+n = 2
+
+[[scrapers]]
+provider = "file"
+[scrapers.fetch]
+query = ["~/documents/report.pdf", "~/documents/*.md"]
+
+[[scrapers]]
+provider = "finance"
+[scrapers.fetch]
+query = ["AAPL", "MSFT", "GOOGL"]
+
+[[scrapers]]
+provider = "yahoo"
+[scrapers.fetch]
+query = "latest AI research breakthroughs"
+n = 5

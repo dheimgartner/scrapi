@@ -8,6 +8,7 @@ from scrapi.llm.ollama import OllamaLLM
 from scrapi.llm.openai import OpenaiLLM
 from scrapi.scraping.dummy import DummyScraper
 from scrapi.scraping.file import FileScraper
+from scrapi.scraping.finance import FinanceScraper
 from scrapi.scraping.yahoo import YahooScraper
 
 LLM_REGISTRY = {
@@ -18,5 +19,6 @@ LLM_REGISTRY = {
 SCRAPER_REGISTRY = {
     "dummy": DummyScraper,
     "file": FileScraper,
+    "finance": FinanceScraper,
     "yahoo": YahooScraper,
 }
