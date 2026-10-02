@@ -1,6 +1,7 @@
 from scrapi.scraping.yahoo import YahooScraper
 from scrapi.scraping.dummy import DummyScraper
 from scrapi.scraping.file import FileScraper
+from scrapi.scraping.finance import FinanceScraper
 from scrapi.config.loader import parse_config
 from scrapi.factory import make_orchestrator
 
@@ -20,6 +21,15 @@ results = scraper.fetch_content(query=["path/to/paper1.pdf", "path/to/paper2.pdf
 for result in results:
     print(result.source["path"])
     print(result.ai_content[:500])
+    print("---")
+
+# --- FinanceScraper: live ticker data via yfinance ---
+scraper = FinanceScraper()
+results = scraper.fetch_content(query=["AAPL", "MSFT"])
+
+for result in results:
+    print(result.source["ticker"])
+    print(result.ai_content)
     print("---")
 
 # --- YahooScraper: live web search ---
