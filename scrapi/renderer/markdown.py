@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class MarkdownRenderer(BaseRenderer):
+    """Renders a ``PipelineResult`` as a Markdown report."""
 
     def __init__(self, pipeline_result: PipelineResult) -> None:
         super().__init__(pipeline_result)
@@ -20,6 +21,18 @@ class MarkdownRenderer(BaseRenderer):
     @singledispatchmethod
     @staticmethod
     def to_markdown(result: BaseInferenceResult) -> str:
+        """Convert an inference result or pipeline result to a Markdown string.
+
+        Dispatches on the concrete type of ``result``; handles
+        ``BaseInferenceResult``, ``SummaryInferenceResult``, and
+        ``PipelineResult``.
+
+        Args:
+            result: The object to render.
+
+        Returns:
+            Markdown-formatted string.
+        """
         return result.result
 
     @to_markdown.register
@@ -47,6 +60,11 @@ class MarkdownRenderer(BaseRenderer):
         return "\n".join(rows)
 
     def render(self) -> str:
+        """Render the pipeline result as a Markdown report.
+
+        Returns:
+            Markdown string containing the full report.
+        """
         sections = [
             "# Scrapi report",
             "## Search results",
@@ -58,6 +76,13 @@ class MarkdownRenderer(BaseRenderer):
         return self._document
 
     def save(self, path: str) -> None:
+        """Write the rendered report to a file.
+
+        Calls ``render()`` first if the report hasn't been rendered yet.
+
+        Args:
+            path: Destination file path.
+        """
         if self._document is None:
             self.render()
         Path(path).write_text(self._document)

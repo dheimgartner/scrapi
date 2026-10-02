@@ -8,6 +8,11 @@ if TYPE_CHECKING:
 
 
 class BaseRenderer(ABC):
+    """Abstract base class for pipeline result renderers.
+
+    Subclasses format a ``PipelineResult`` into a specific output format
+    and expose ``render()`` and ``save()`` as the public interface.
+    """
 
     def __init__(self, pipeline_result: PipelineResult) -> None:
         self._pipeline_result = pipeline_result
