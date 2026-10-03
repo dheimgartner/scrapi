@@ -51,6 +51,7 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 
 | Provider | Config keys |
 |---|---|
+| `anthropic` | `model`, `api_key` |
 | `openai` | `azure_endpoint`, `api_version`, `model`, `api_key` |
 | `ollama` | `base_url`, `model` |
 
@@ -67,6 +68,7 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 
 | Variable | Purpose |
 |---|---|
+| `ANTHROPIC_API_KEY` | API key for the `anthropic` provider (can also be set in `[llm.config]`) |
 | `AZURE_OPENAI_API_KEY` | API key for the `openai` provider (can also be set in `[llm.config]`) |
 
 ## Usage
