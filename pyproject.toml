@@ -16,6 +16,7 @@ dependencies = [
     "ddgs",
     "httpx",
     "langchain",
+    "langchain_anthropic",
     "langchain_core",
     "langchain_openai",
     "langgraph",
