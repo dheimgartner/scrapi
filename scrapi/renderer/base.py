@@ -15,7 +15,7 @@ class BaseRenderer(ABC):
     """
 
     def __init__(self, output_path: str | None = None) -> None:
-        self._output_path = output_path
+        self.output_path = output_path
         self._document: str | None = None
 
     @abstractmethod
@@ -31,7 +31,3 @@ class BaseRenderer(ABC):
         """The last rendered output, or None if ``render()`` hasn't been called yet."""
         return self._document
 
-    @property
-    def output_path(self) -> str | None:
-        """Destination path for ``save()``, or None if not configured."""
-        return self._output_path
