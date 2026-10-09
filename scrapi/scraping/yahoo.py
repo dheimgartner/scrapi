@@ -1,8 +1,12 @@
+import os
 from datetime import datetime
 import logging
+from tempfile import NamedTemporaryFile
 from typing import Any
 
+from bs4 import BeautifulSoup
 from ddgs import DDGS
+from markitdown import MarkItDown
 from tqdm import tqdm
 
 import scrapi.scraping.base as bs
@@ -33,8 +37,42 @@ class YahooScraper(bs.BaseScraper):
         return [self._create_web_search_result(r) for r in search_results]
 
     @staticmethod
+    def html_to_markdown(
+        html: str,
+        remove_tags: tuple[str, ...] = ("script", "style"),
+    ) -> str:
+        """Convert an HTML string to Markdown.
+
+        Strips the specified tags before conversion to reduce noise.
+
+        Args:
+            html: Raw HTML string.
+            remove_tags: Tag names to strip before conversion.
+
+        Returns:
+            Markdown-formatted string.
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup(remove_tags):
+            tag.decompose()
+
+        with NamedTemporaryFile(
+            mode="w",
+            suffix=".html",
+            encoding="utf-8",
+            delete=False,
+        ) as f:
+            f.write(str(soup))
+            filepath = f.name
+
+        md = MarkItDown()
+        markdown = md.convert(filepath).text_content
+        os.remove(filepath)
+        return markdown
+
+    @staticmethod
     def convert_to_ai_content(raw_content: Any) -> str:
-        return bs.BaseScraper.html_to_markdown(raw_content)
+        return YahooScraper.html_to_markdown(raw_content)
 
     @staticmethod
     def _retrieve_and_add_page_content(search_results: list[dict]) -> None:

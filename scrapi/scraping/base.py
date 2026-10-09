@@ -1,10 +1,5 @@
-import os
 from abc import ABC, abstractmethod
-from tempfile import NamedTemporaryFile
 from typing import Any
-
-from bs4 import BeautifulSoup
-from markitdown import MarkItDown
 
 from scrapi.exceptions import NoResultsFoundError
 from scrapi.models.search_result import BaseSearchResult
@@ -56,37 +51,3 @@ class BaseScraper(ABC):
     def convert_to_ai_content(raw_content: Any) -> str:
         """Convert the raw content to content suitable for LLM consumption."""
         pass
-
-    @staticmethod
-    def html_to_markdown(
-        html: str,
-        remove_tags: tuple[str, ...] = ("script", "style"),
-    ) -> str:
-        """Convert an HTML string to Markdown.
-
-        Strips the specified tags before conversion to reduce noise.
-
-        Args:
-            html: Raw HTML string.
-            remove_tags: Tag names to strip before conversion.
-
-        Returns:
-            Markdown-formatted string.
-        """
-        soup = BeautifulSoup(html, "html.parser")
-        for tag in soup(remove_tags):
-            tag.decompose()
-
-        with NamedTemporaryFile(
-            mode="w",
-            suffix=".html",
-            encoding="utf-8",
-            delete=False,
-        ) as f:
-            f.write(str(soup))
-            filepath = f.name
-
-        md = MarkItDown()
-        markdown = md.convert(filepath).text_content
-        os.remove(filepath)
-        return markdown
