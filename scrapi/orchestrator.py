@@ -5,7 +5,7 @@ from scrapi.scraping.base import BaseScraper
 from scrapi.inference.search import SearchInference
 from scrapi.inference.summary import SummaryInference
 from scrapi.models.inference_result import SearchInferenceResult
-from scrapi.models.pipeline_result import PipelineResult, ResultPair
+from scrapi.models.run_result import RunResult, ResultPair
 
 if TYPE_CHECKING:
     from scrapi.renderer.base import BaseRenderer
@@ -36,10 +36,10 @@ class Orchestrator:
         self.summary_inference = summary_inference
         self.renderer = renderer
 
-        self.pipeline_result: PipelineResult | None = None
+        self.run_result: RunResult | None = None
         self._pipeline_id = uuid.uuid4().hex
 
-    def run(self) -> PipelineResult:
+    def run(self) -> RunResult:
         """Fetches search results, analyses each, and aggregates to a final summary.
 
         Iterates over all scrapers, fetches results via each scraper's fetch kwargs,
@@ -47,7 +47,7 @@ class Orchestrator:
         collected results.
 
         Returns:
-            A ``PipelineResult`` pairing each search result with its inference result
+            A ``RunResult`` pairing each search result with its inference result
             and containing the final summary.
         """
         pairs: list[ResultPair] = []
@@ -64,18 +64,18 @@ class Orchestrator:
         summary = self.summary_inference.analyse(search_inference_results)
         summary.pipeline_id = self._pipeline_id
 
-        self.pipeline_result = PipelineResult(results=pairs, summary=summary)
+        self.run_result = RunResult(results=pairs, summary=summary)
 
         if self.renderer is not None:
-            self.renderer.render(self.pipeline_result)
+            self.renderer.render(self.run_result)
             if self.renderer.output_path is not None:
                 self.renderer.save()
 
-        return self.pipeline_result
+        return self.run_result
 
     @property
     def result(self) -> str | None:
         """The final summary text, or None if ``run()`` hasn't been called yet."""
-        if self.pipeline_result is None:
+        if self.run_result is None:
             return None
-        return self.pipeline_result.summary.result
+        return self.run_result.summary.result

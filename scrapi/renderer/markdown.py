@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING
 from scrapi.exceptions import RendererError
 from scrapi.renderer.base import BaseRenderer
 from scrapi.models.inference_result import SummaryInferenceResult
-from scrapi.models.pipeline_result import PipelineResult
+from scrapi.models.run_result import RunResult
 
 if TYPE_CHECKING:
     from scrapi.models.inference_result import BaseInferenceResult
 
 
 class MarkdownRenderer(BaseRenderer):
-    """Renders a ``PipelineResult`` as a Markdown report."""
+    """Renders a ``RunResult`` as a Markdown report."""
 
     def __init__(self, output_path: str | None = None) -> None:
         super().__init__(output_path=output_path)
@@ -26,7 +26,7 @@ class MarkdownRenderer(BaseRenderer):
 
         Dispatches on the concrete type of ``result``; handles
         ``BaseInferenceResult``, ``SummaryInferenceResult``, and
-        ``PipelineResult``.
+        ``RunResult``.
 
         Args:
             result: The object to render.
@@ -46,7 +46,7 @@ class MarkdownRenderer(BaseRenderer):
 
     @to_markdown.register
     @staticmethod
-    def _(result: PipelineResult) -> str:
+    def _(result: RunResult) -> str:
         if len(result) == 0:
             return "_No results._"
         rows = ["| # | ID | Scraper | Status | Fetched at | Source |", "|---|---|---|---|---|---|"]
@@ -60,11 +60,11 @@ class MarkdownRenderer(BaseRenderer):
             rows.append(f"| {i} | {sr.id} | {sr.scraper_repr} | {status} | {fetched_at} | {source} |")
         return "\n".join(rows)
 
-    def render(self, pipeline_result: PipelineResult) -> str:
-        """Render ``pipeline_result`` as a Markdown report.
+    def render(self, run_result: RunResult) -> str:
+        """Render ``run_result`` as a Markdown report.
 
         Args:
-            pipeline_result: The completed pipeline result to render.
+            run_result: The completed pipeline result to render.
 
         Returns:
             Markdown string containing the full report.
@@ -72,9 +72,9 @@ class MarkdownRenderer(BaseRenderer):
         sections = [
             "# Scrapi report",
             "## Search results",
-            self.to_markdown(pipeline_result),
+            self.to_markdown(run_result),
             "## Summary",
-            self.to_markdown(pipeline_result.summary),
+            self.to_markdown(run_result.summary),
         ]
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document

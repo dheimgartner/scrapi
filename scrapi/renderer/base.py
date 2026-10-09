@@ -4,13 +4,13 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from scrapi.models.pipeline_result import PipelineResult
+    from scrapi.models.run_result import RunResult
 
 
 class BaseRenderer(ABC):
     """Abstract base class for pipeline result renderers.
 
-    Subclasses format a ``PipelineResult`` into a specific output format
+    Subclasses format a ``RunResult`` into a specific output format
     and expose ``render()`` and ``save()`` as the public interface.
     """
 
@@ -19,8 +19,8 @@ class BaseRenderer(ABC):
         self._document: str | None = None
 
     @abstractmethod
-    def render(self, pipeline_result: PipelineResult) -> str:
-        """Render ``pipeline_result`` and return it as a string."""
+    def render(self, run_result: RunResult) -> str:
+        """Render ``run_result`` and return it as a string."""
 
     @abstractmethod
     def save(self) -> None:
