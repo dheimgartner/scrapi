@@ -15,7 +15,7 @@ source .venv/bin/activate
 
 ## Configuration
 
-`scrapi` is configured with a TOML file. The three top-level sections are `[llm]`, `[inference]`, and `[[scrapers]]`.
+`scrapi` is configured with a TOML file. The required top-level sections are `[llm]`, `[inference]`, and `[[scrapers]]`. The `[renderer]` section is optional.
 
 ```toml
 [llm]
@@ -43,9 +43,13 @@ n = 5
 provider = "finance"
 [scrapers.fetch]
 query = ["AAPL"]
+
+[renderer]
+provider = "markdown"
+output_path = "~/report.md"
 ```
 
-Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks.
+Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks. When `[renderer]` is present, `orchestrator.run()` automatically renders and saves the report to `output_path`.
 
 **LLM providers**
 
@@ -63,6 +67,12 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 | `file` | `query` (list of paths/globs) | Local files; PDFs and common document formats |
 | `finance` | `query` (list of ticker symbols) | Financial data via yfinance |
 | `dummy` | `query` (str), `n` (int) | Synthetic results for testing |
+
+**Renderer providers**
+
+| Provider | Description |
+|---|---|
+| `markdown` | Markdown report with a search results table and summary |
 
 **Environment variables**
 
@@ -107,6 +117,7 @@ config = parse_config({
         {"provider": "yahoo", "fetch": {"query": "Apple latest company news", "n": 5}},
         {"provider": "finance", "fetch": {"query": ["AAPL"]}},
     ],
+    "renderer": {"provider": "markdown", "output_path": "~/report.md"},
 })
 
 orchestrator = make_orchestrator(config)
@@ -125,9 +136,14 @@ print(result.summary.result)       # final aggregated verdict
 
 ### Rendering
 
+When a `[renderer]` section is present in the config, the report is rendered and saved automatically at the end of `orchestrator.run()`. To render manually:
+
 ```python
 from scrapi.renderer.markdown import MarkdownRenderer
 
-renderer = MarkdownRenderer(result)
-renderer.save("report.md")
+renderer = MarkdownRenderer(output_path="report.md")
+renderer.render(result)
+renderer.save()
 ```
+
+`render()` returns the document as a string and caches it; `save()` writes the cache to `output_path`.
