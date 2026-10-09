@@ -11,6 +11,7 @@ from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.scraping.dummy import DummyScraper
 from scrapi.scraping.file import FileScraper
 from scrapi.scraping.finance import FinanceScraper
+from scrapi.scraping.sql import SQLScraper
 from scrapi.scraping.yahoo import YahooScraper
 
 LLM_REGISTRY = {
@@ -27,5 +28,6 @@ SCRAPER_REGISTRY = {
     "dummy": DummyScraper,
     "file": FileScraper,
     "finance": FinanceScraper,
+    "sql": SQLScraper,
     "yahoo": YahooScraper,
 }

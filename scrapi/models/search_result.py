@@ -81,3 +81,13 @@ class FinanceSearchResult(BaseSearchResult):
     """
 
     raw_content: FinancialSnapshot
+
+
+@dataclass
+class SQLSearchResult(BaseSearchResult):
+    """Search result from the SQL scraper.
+
+    ``raw_content`` is a ``list[dict]`` where each dict represents one row.
+    """
+
+    raw_content: list[dict]

@@ -66,6 +66,7 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 | `yahoo` | `query` (str), `n` (int) | Yahoo web search via DDGS + Selenium |
 | `file` | `query` (list of paths/globs) | Local files; PDFs and common document formats |
 | `finance` | `query` (list of ticker symbols) | Financial data via yfinance |
+| `sql` | `query` (str), `rows_as_results` (bool) | SQL query via SQLAlchemy; result set rendered as a Markdown table |
 | `dummy` | `query` (str), `n` (int) | Synthetic results for testing |
 
 **Renderer providers**
@@ -80,6 +81,18 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 |---|---|
 | `ANTHROPIC_API_KEY` | API key for the `anthropic` provider (can also be set in `[llm.config]`) |
 | `AZURE_OPENAI_API_KEY` | API key for the `openai` provider (can also be set in `[llm.config]`) |
+
+The `sql` scraper supports `${VAR}` placeholders anywhere in the connection string. They are resolved from the environment at instantiation time and URL-encoded automatically, so passwords containing special characters work without manual escaping:
+
+```toml
+[[scrapers]]
+provider = "sql"
+[scrapers.config]
+connection_string = "mssql+pymssql://user:${DB_PASSWORD}@host:1433/mydb"
+[scrapers.fetch]
+query = "SELECT * FROM schema.table"
+rows_as_results = false
+```
 
 ## Usage
 

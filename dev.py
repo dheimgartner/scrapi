@@ -1,9 +1,28 @@
+import os
+
+from scrapi.scraping.sql import SQLScraper
 from scrapi.scraping.yahoo import YahooScraper
 from scrapi.scraping.dummy import DummyScraper
 from scrapi.scraping.file import FileScraper
 from scrapi.scraping.finance import FinanceScraper
 from scrapi.config.loader import parse_config
 from scrapi.factory import make_orchestrator
+
+# --- SQLScraper: SQL query via SQLAlchemy, password from env var ---
+os.environ["DB_PASSWORD"] = "pleasechangeit@123"
+scraper = SQLScraper("mssql+pymssql://dev:${DB_PASSWORD}@10.89.0.12:1433/testdb")
+
+# Single result containing the full result set
+results = scraper.fetch_content(query="SELECT * FROM testdb.demo.customers", rows_as_results=False)
+print(results[0].ai_content)
+print("---")
+
+# One result per row
+results = scraper.fetch_content(query="SELECT * FROM testdb.demo.customers", rows_as_results=True)
+for result in results:
+    print(result.source)
+    print(result.ai_content)
+    print("---")
 
 # --- DummyScraper: no network, instant results ---
 scraper = DummyScraper()
