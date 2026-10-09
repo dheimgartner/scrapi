@@ -1,5 +1,6 @@
 import os
 import re
+import urllib.parse
 from datetime import datetime
 from typing import Any
 
@@ -93,6 +94,9 @@ class SQLScraper(bs.BaseScraper):
 def _resolve_env_vars(s: str) -> str:
     """Substitute ``${VAR}`` placeholders in ``s`` from the environment.
 
+    Substituted values are URL-encoded so that special characters in
+    passwords (e.g. ``@``, ``#``) do not break URL parsing.
+
     Raises:
         ValueError: If a referenced variable is not set.
     """
@@ -103,6 +107,6 @@ def _resolve_env_vars(s: str) -> str:
             raise ValueError(
                 f"Environment variable '{var}' referenced in connection string is not set"
             )
-        return val
+        return urllib.parse.quote(val, safe="")
 
     return re.sub(r"\$\{([^}]+)\}", _sub, s)
