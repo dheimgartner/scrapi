@@ -69,7 +69,7 @@ class Orchestrator:
         if self.renderer is not None:
             self.renderer.render(self.pipeline_result)
             if self.renderer.output_path is not None:
-                self.renderer.save(self.renderer.output_path)
+                self.renderer.save()
 
         return self.pipeline_result
 

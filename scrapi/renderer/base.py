@@ -23,8 +23,8 @@ class BaseRenderer(ABC):
         """Render ``pipeline_result`` and return it as a string."""
 
     @abstractmethod
-    def save(self, path: str) -> None:
-        """Write the rendered document to disk. Call ``render()`` first."""
+    def save(self) -> None:
+        """Write the rendered document to ``output_path``. Call ``render()`` first."""
 
     @property
     def document(self) -> str | None:

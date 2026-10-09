@@ -79,15 +79,12 @@ class MarkdownRenderer(BaseRenderer):
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
 
-    def save(self, path: str) -> None:
-        """Write the rendered report to a file.
-
-        Args:
-            path: Destination file path.
+    def save(self) -> None:
+        """Write the rendered report to ``output_path``.
 
         Raises:
-            RuntimeError: If ``render()`` has not been called yet.
+            RendererError: If ``render()`` has not been called yet.
         """
         if self._document is None:
             raise RendererError("call render() before save()")
-        Path(path).write_text(self._document)
+        Path(self.output_path).write_text(self._document)
