@@ -50,6 +50,9 @@ class SQLScraper(bs.BaseScraper):
             result = conn.execute(text(query))
             rows = [dict(row._mapping) for row in result]
 
+        if not rows:
+            return []
+
         if rows_as_results:
             return [
                 self._make_result(query, [row], row_index=i)
@@ -85,10 +88,7 @@ class SQLScraper(bs.BaseScraper):
         Returns:
             Markdown table string, or ``"(no rows)"`` for an empty result.
         """
-        rows: list[dict] = raw_content
-        if not rows:
-            return "(no rows)"
-        return tabulate(rows, headers="keys", tablefmt="github")
+        return tabulate(raw_content, headers="keys", tablefmt="github")
 
 
 def _resolve_env_vars(s: str) -> str:
