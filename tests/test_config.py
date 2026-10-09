@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from scrapi.config.loader import parse_config, load_toml_config
-from scrapi.config.schemas import ScrapiConfig
+from scrapi.config.schemas import ScrapiConfig, RendererConfig
 from scrapi.exceptions import ConfigLoadError
 
 
@@ -66,6 +66,26 @@ def test_load_toml_config_from_file():
         assert config.scrapers[0].fetch["n"] == 2
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+def test_parse_config_renderer():
+    config = parse_config({
+        **_BASE_CONFIG,
+        "renderer": {"provider": "markdown", "output_path": "~/out.md"},
+    })
+    assert isinstance(config.renderer, RendererConfig)
+    assert config.renderer.provider == "markdown"
+    assert config.renderer.output_path == "~/out.md"
+
+
+def test_parse_config_renderer_optional():
+    config = parse_config(_BASE_CONFIG)
+    assert config.renderer is None
+
+
+def test_parse_config_renderer_no_output_path():
+    config = parse_config({**_BASE_CONFIG, "renderer": {"provider": "markdown"}})
+    assert config.renderer.output_path is None
 
 
 def test_load_toml_config_invalid_toml():

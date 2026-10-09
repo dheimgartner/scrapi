@@ -7,6 +7,7 @@ Used by the config parsing/factory code to resolve a provider string
 from scrapi.llm.anthropic import AnthropicLLM
 from scrapi.llm.ollama import OllamaLLM
 from scrapi.llm.openai import OpenaiLLM
+from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.scraping.dummy import DummyScraper
 from scrapi.scraping.file import FileScraper
 from scrapi.scraping.finance import FinanceScraper
@@ -16,6 +17,10 @@ LLM_REGISTRY = {
     "anthropic": AnthropicLLM,
     "ollama": OllamaLLM,
     "openai": OpenaiLLM,
+}
+
+RENDERER_REGISTRY = {
+    "markdown": MarkdownRenderer,
 }
 
 SCRAPER_REGISTRY = {

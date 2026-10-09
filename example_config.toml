@@ -32,3 +32,7 @@ provider = "yahoo"
 [scrapers.fetch]
 query = "latest AI research breakthroughs"
 n = 5
+
+[renderer]
+provider = "markdown"
+output_path = "~/scrapi_report.md"

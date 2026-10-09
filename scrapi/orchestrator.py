@@ -1,10 +1,14 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from scrapi.scraping.base import BaseScraper
 from scrapi.inference.search import SearchInference
 from scrapi.inference.summary import SummaryInference
 from scrapi.models.inference_result import SearchInferenceResult
 from scrapi.models.pipeline_result import PipelineResult, ResultPair
+
+if TYPE_CHECKING:
+    from scrapi.renderer.base import BaseRenderer
 
 
 class Orchestrator:
@@ -15,6 +19,7 @@ class Orchestrator:
         scrapers: list[tuple[BaseScraper, dict]],
         search_inference: SearchInference,
         summary_inference: SummaryInference,
+        renderer: "BaseRenderer | None" = None,
     ) -> None:
         """Initializes the Orchestrator with pre-built dependencies.
 
@@ -23,10 +28,13 @@ class Orchestrator:
                 ``fetch_content`` is called with its associated kwargs.
             search_inference: Inference object for per-result analysis.
             summary_inference: Inference object for final summarisation.
+            renderer: Optional renderer. If provided, ``run()`` renders the
+                result and saves it to ``renderer.output_path`` when set.
         """
         self.scrapers = scrapers
         self.search_inference = search_inference
         self.summary_inference = summary_inference
+        self.renderer = renderer
 
         self.pipeline_result: PipelineResult | None = None
         self._pipeline_id = uuid.uuid4().hex
@@ -57,6 +65,12 @@ class Orchestrator:
         summary.pipeline_id = self._pipeline_id
 
         self.pipeline_result = PipelineResult(results=pairs, summary=summary)
+
+        if self.renderer is not None:
+            self.renderer.render(self.pipeline_result)
+            if self.renderer.output_path is not None:
+                self.renderer.save()
+
         return self.pipeline_result
 
     @property

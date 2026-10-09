@@ -1,6 +1,8 @@
 """End-to-end pipeline tests: DummyScraper → Orchestrator → MarkdownRenderer."""
 
+import tempfile
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from scrapi.inference.schemas import SearchSchema, SummarySchema
@@ -62,10 +64,40 @@ def test_pipeline_with_dummy_scraper():
     mock_summary_inference.analyse.assert_called_once()
     assert orchestrator.result == "Final verdict"
 
-    output = MarkdownRenderer(pipeline_result=pipeline_result).render()
+    renderer = MarkdownRenderer()
+    output = renderer.render(pipeline_result)
     assert isinstance(output, str)
     assert "# Scrapi report" in output
     assert "## Search results" in output
     assert "dummy.example.com" in output
     assert "## Summary" in output
     assert "Final verdict" in output
+
+
+def test_orchestrator_auto_saves_with_renderer():
+    scraper = DummyScraper()
+
+    mock_search_inference = MagicMock()
+    mock_search_inference.analyse.side_effect = lambda _: _make_fake_search_inference()
+
+    mock_summary_inference = MagicMock()
+    mock_summary_inference.analyse.return_value = _make_fake_summary_inference()
+
+    with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+        output_path = f.name
+
+    try:
+        renderer = MarkdownRenderer(output_path=output_path)
+        orchestrator = Orchestrator(
+            scrapers=[(scraper, {"query": "test", "n": 1})],
+            search_inference=mock_search_inference,
+            summary_inference=mock_summary_inference,
+            renderer=renderer,
+        )
+        orchestrator.run()
+
+        saved = Path(output_path).read_text()
+        assert "# Scrapi report" in saved
+        assert "Final verdict" in saved
+    finally:
+        Path(output_path).unlink(missing_ok=True)

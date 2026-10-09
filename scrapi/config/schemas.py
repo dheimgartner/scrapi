@@ -71,6 +71,19 @@ class InferenceConfig:
 
 
 @dataclass
+class RendererConfig:
+    """Configuration for the renderer component.
+
+    Attributes:
+        provider: Registry key identifying the renderer implementation to use.
+        output_path: Optional path where the rendered document is saved.
+    """
+
+    provider: str
+    output_path: str | None = None
+
+
+@dataclass
 class ScrapiConfig:
     """Top-level configuration for a scrapi run.
 
@@ -78,8 +91,10 @@ class ScrapiConfig:
         llm: Configuration for the LLM provider.
         inference: Configuration for both inference stages.
         scrapers: List of scraper configurations, each with its own fetch args.
+        renderer: Optional renderer configuration. If omitted, no output is saved.
     """
 
     llm: LLMConfig
     inference: InferenceConfig
     scrapers: list[ScraperConfig]
+    renderer: RendererConfig | None = None

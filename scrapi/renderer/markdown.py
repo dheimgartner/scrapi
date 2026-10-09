@@ -4,6 +4,7 @@ from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from scrapi.exceptions import RendererError
 from scrapi.renderer.base import BaseRenderer
 from scrapi.models.inference_result import SummaryInferenceResult
 from scrapi.models.pipeline_result import PipelineResult
@@ -15,8 +16,8 @@ if TYPE_CHECKING:
 class MarkdownRenderer(BaseRenderer):
     """Renders a ``PipelineResult`` as a Markdown report."""
 
-    def __init__(self, pipeline_result: PipelineResult) -> None:
-        super().__init__(pipeline_result)
+    def __init__(self, output_path: str | None = None) -> None:
+        super().__init__(output_path=output_path)
 
     @singledispatchmethod
     @staticmethod
@@ -59,8 +60,11 @@ class MarkdownRenderer(BaseRenderer):
             rows.append(f"| {i} | {sr.id} | {sr.scraper_repr} | {status} | {fetched_at} | {source} |")
         return "\n".join(rows)
 
-    def render(self) -> str:
-        """Render the pipeline result as a Markdown report.
+    def render(self, pipeline_result: PipelineResult) -> str:
+        """Render ``pipeline_result`` as a Markdown report.
+
+        Args:
+            pipeline_result: The completed pipeline result to render.
 
         Returns:
             Markdown string containing the full report.
@@ -68,21 +72,19 @@ class MarkdownRenderer(BaseRenderer):
         sections = [
             "# Scrapi report",
             "## Search results",
-            self.to_markdown(self._pipeline_result),
+            self.to_markdown(pipeline_result),
             "## Summary",
-            self.to_markdown(self._pipeline_result.summary),
+            self.to_markdown(pipeline_result.summary),
         ]
         self._document = "\n\n".join(sections).rstrip() + "\n"
         return self._document
 
-    def save(self, path: str) -> None:
-        """Write the rendered report to a file.
+    def save(self) -> None:
+        """Write the rendered report to ``output_path``.
 
-        Calls ``render()`` first if the report hasn't been rendered yet.
-
-        Args:
-            path: Destination file path.
+        Raises:
+            RendererError: If ``render()`` has not been called yet.
         """
         if self._document is None:
-            self.render()
-        Path(path).write_text(self._document)
+            raise RendererError("call render() before save()")
+        Path(self.output_path).write_text(self._document)
