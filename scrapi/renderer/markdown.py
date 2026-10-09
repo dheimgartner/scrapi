@@ -4,6 +4,7 @@ from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from scrapi.exceptions import RendererError
 from scrapi.renderer.base import BaseRenderer
 from scrapi.models.inference_result import SummaryInferenceResult
 from scrapi.models.pipeline_result import PipelineResult
@@ -88,5 +89,5 @@ class MarkdownRenderer(BaseRenderer):
             RuntimeError: If ``render()`` has not been called yet.
         """
         if self._document is None:
-            raise RuntimeError("call render() before save()")
+            raise RendererError("call render() before save()")
         Path(path).write_text(self._document)

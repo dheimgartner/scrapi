@@ -19,3 +19,7 @@ class ConfigLoadError(ScrapiError):
 
 class NoResultsFoundError(ScrapiError):
     """Raised when a scraper returns no results or errors during fetch."""
+
+
+class RendererError(ScrapiError):
+    """Raised when a renderer is used incorrectly or fails to produce output."""
