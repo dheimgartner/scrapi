@@ -39,10 +39,16 @@ def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
         for sc in config.scrapers
     ]
 
+    renderer = None
+    if config.renderer is not None:
+        renderer_cls = registry.RENDERER_REGISTRY[config.renderer.provider]
+        renderer = renderer_cls(output_path=config.renderer.output_path)
+
     return Orchestrator(
         scrapers=scrapers,
         search_inference=search_inference,
         summary_inference=summary_inference,
+        renderer=renderer,
     )
 
 

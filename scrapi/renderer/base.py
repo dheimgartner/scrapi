@@ -14,24 +14,24 @@ class BaseRenderer(ABC):
     and expose ``render()`` and ``save()`` as the public interface.
     """
 
-    def __init__(self, pipeline_result: PipelineResult) -> None:
-        self._pipeline_result = pipeline_result
+    def __init__(self, output_path: str | None = None) -> None:
+        self._output_path = output_path
         self._document: str | None = None
 
     @abstractmethod
-    def render(self) -> str:
-        """Renders the pipeline result and returns it as a string.
-
-        Implementations should walk `self._pipeline_result`, call
-        `render_search_result()` and `render_inference_result()`,
-        assemble the final document, and return it.
-        """
+    def render(self, pipeline_result: PipelineResult) -> str:
+        """Render ``pipeline_result`` and return it as a string."""
 
     @abstractmethod
     def save(self, path: str) -> None:
-        """Compile if necessary and write the result to disk."""
+        """Write the rendered document to disk. Call ``render()`` first."""
 
     @property
     def document(self) -> str | None:
-        """The last rendered output, or None if render()/save() hasn't been called yet."""
+        """The last rendered output, or None if ``render()`` hasn't been called yet."""
         return self._document
+
+    @property
+    def output_path(self) -> str | None:
+        """Destination path for ``save()``, or None if not configured."""
+        return self._output_path

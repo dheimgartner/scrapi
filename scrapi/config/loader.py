@@ -5,6 +5,7 @@ from scrapi.exceptions import ConfigLoadError
 from scrapi.config.schemas import (
     ScrapiConfig,
     LLMConfig,
+    RendererConfig,
     ScraperConfig,
     InferenceConfig,
     SearchInferenceConfig,
@@ -21,6 +22,16 @@ def parse_config(source: dict) -> ScrapiConfig:
     Returns:
         A ScrapiConfig populated from the dict.
     """
+    renderer_raw = source.get("renderer")
+    renderer = (
+        RendererConfig(
+            provider=renderer_raw["provider"],
+            output_path=renderer_raw.get("output_path"),
+        )
+        if renderer_raw is not None
+        else None
+    )
+
     return ScrapiConfig(
         llm=LLMConfig(
             provider=source["llm"]["provider"],
@@ -44,6 +55,7 @@ def parse_config(source: dict) -> ScrapiConfig:
             )
             for s in source["scrapers"]
         ],
+        renderer=renderer,
     )
 
 
