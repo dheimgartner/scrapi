@@ -43,6 +43,10 @@ dev = [
     "black",
     "pipreqs",
 ]
+gui = [
+    "fastapi",
+    "uvicorn[standard]",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
