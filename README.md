@@ -137,7 +137,7 @@ orchestrator = make_orchestrator(config)
 result = orchestrator.run()
 ```
 
-The returned `PipelineResult` contains individual result pairs (search result + inference result) and a final summary:
+The returned `RunResult` contains individual result pairs (search result + inference result) and a final summary:
 
 ```python
 for pair in result:
