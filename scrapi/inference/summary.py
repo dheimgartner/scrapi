@@ -24,7 +24,7 @@ class SummaryInference:
             schema=SummarySchema,
         )
 
-    def analyse(self, search_inference_results: list[SearchInferenceResult]) -> SummaryInferenceResult:
+    def run(self, search_inference_results: list[SearchInferenceResult]) -> SummaryInferenceResult:
         content = f"articles:\n\n{self._serialize(search_inference_results)}"
         ir = self._inference.run(content)
         structured_output = cast(SummarySchema, ir.structured_output)

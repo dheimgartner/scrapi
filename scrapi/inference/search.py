@@ -24,7 +24,7 @@ class SearchInference:
             schema=SearchSchema,
         )
 
-    def analyse(self, search_result: BaseSearchResult) -> SearchInferenceResult:
+    def run(self, search_result: BaseSearchResult) -> SearchInferenceResult:
         content = f"search_id: {search_result.id}\n\narticle:\n\n{search_result.ai_content}"
         ir = self._inference.run(content)
         structured_output = cast(SearchSchema, ir.structured_output)

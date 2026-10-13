@@ -56,12 +56,12 @@ class Orchestrator:
         for scraper, fetch_kwargs in self.scrapers:
             for sr in scraper.fetch_content(**fetch_kwargs):
                 sr.pipeline_id = self._pipeline_id
-                ir = self.search_inference.analyse(sr)
+                ir = self.search_inference.run(sr)
                 ir.pipeline_id = self._pipeline_id
                 pairs.append(ResultPair(search=sr, inference=ir))
                 search_inference_results.append(ir)
 
-        summary = self.summary_inference.analyse(search_inference_results)
+        summary = self.summary_inference.run(search_inference_results)
         summary.pipeline_id = self._pipeline_id
 
         self.run_result = RunResult(results=pairs, summary=summary)
