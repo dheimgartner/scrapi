@@ -1,33 +1,22 @@
-from abc import ABC
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING
 import uuid
 from pydantic import BaseModel
 
-from scrapi.inference.schemas import SearchSchema, SummarySchema
+if TYPE_CHECKING:
+    from scrapi.inference.schemas import SearchSchema, SummarySchema
 
 
 @dataclass
-class BaseInferenceResult(ABC):
-    """Every BaseSearchResult piped through an inference engine
-    must yield an object of class BaseInferenceResult.
-
-    Subclasses must declare the `structured_output` field.
-
-    Attributes:
-        id: Unique identifier for this inference result (auto-generated if not provided).
-        pipeline_id: Unique identifier for the pipeline run, linking search results, inference results, and summary result.
-        prompted_at: Timestamp at which the prompt was sent to the inference engine.
-        system_prompt: System prompt supplied to the inference engine.
-        task_prompt: Task-specific prompt supplied to the inference engine.
-        structured_output: Structured output returned by the inference engine; shape is subclass-specific.
-        result: Main field of `structured_output`.
-    """
+class BaseInferenceResult:
     prompted_at: datetime
     system_prompt: str
     task_prompt: str
     structured_output: BaseModel
-    result: str
+    result: str | None = None
     id: str | None = None
     pipeline_id: str | None = None
 

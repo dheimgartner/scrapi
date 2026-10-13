@@ -1,23 +1,15 @@
 import json
-
-from datetime import datetime
-from langchain_core.language_models import BaseChatModel
 from typing import cast
 
-from scrapi.inference.base import BaseStructuredInference
+from langchain_core.language_models import BaseChatModel
+
+from scrapi.inference.inference import Inference
 from scrapi.inference.schemas import SummarySchema
 from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
 
 
-class SummaryInference(BaseStructuredInference):
-    """Summarises a set of search inference results into one summary.
-
-    Attributes:
-        system_prompt: System-level instructions sent to the LLM,
-            establishing its role/behaviour for the summarisation task.
-        task_prompt: Human-level instructions describing the specific
-            summarisation task to perform.
-    """
+class SummaryInference:
+    """Summarises a set of search inference results into one summary."""
 
     def __init__(
         self,
@@ -25,44 +17,27 @@ class SummaryInference(BaseStructuredInference):
         system_prompt: str,
         task_prompt: str,
     ) -> None:
-        super().__init__(llm, schema=SummarySchema)
-        self.system_prompt = system_prompt
-        self.task_prompt = task_prompt
+        self._inference = Inference(
+            llm=llm,
+            system_prompt=system_prompt,
+            task_prompt=task_prompt,
+            schema=SummarySchema,
+        )
 
     def analyse(self, search_inference_results: list[SearchInferenceResult]) -> SummaryInferenceResult:
-        """Summarise a collection of search inference results.
-
-        Serialises the given search inference structured output field,
-        sends them to the LLM alongside the system/task prompts, and
-        returns a summary inference result.
-
-        Args:
-            search_inference_results: List of search inference results to summarise.
-                Each result's id is recorded as a source, and
-                its structured output is serialised into
-                the prompt sent to the LLM.
-
-        Returns:
-            A `SummaryInferenceResult` whose `result` is a `SummarySchema` instance.
-        """
-        serialized = self._serialize_search_inference_results(search_inference_results)
-        messages = [
-            ("system", self.system_prompt),
-            ("human", self.task_prompt),
-            ("human", f"articles:\n\n{serialized}"),
-        ]
-
-        structured_output = cast(SummarySchema, self.call_structured(messages))
+        content = f"articles:\n\n{self._serialize(search_inference_results)}"
+        ir = self._inference.run(content)
+        structured_output = cast(SummarySchema, ir.structured_output)
         return SummaryInferenceResult(
-            system_prompt=self.system_prompt,
-            task_prompt=self.task_prompt,
-            prompted_at=datetime.now(),
+            system_prompt=ir.system_prompt,
+            task_prompt=ir.task_prompt,
+            prompted_at=ir.prompted_at,
             structured_output=structured_output,
-            result=structured_output.result
+            result=structured_output.result,
         )
 
     @staticmethod
-    def _serialize_search_inference_results(search_inference_results: list[SearchInferenceResult]) -> str:
+    def _serialize(search_inference_results: list[SearchInferenceResult]) -> str:
         return json.dumps(
             [
                 {"source": sir.id, **sir.structured_output.model_dump()}
