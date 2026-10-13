@@ -147,6 +147,29 @@ for pair in result:
 print(result.summary.result)       # final aggregated verdict
 ```
 
+### Inference without the orchestrator
+
+`Inference` can be used standalone against any scraper output:
+
+```python
+from pydantic import BaseModel, Field
+from scrapi.scraping.dummy import DummyScraper
+from scrapi.inference import Inference
+
+class RiskSchema(BaseModel):
+    summary: str = Field(description="One-sentence summary of the result.")
+    risk: str = Field(description="Key risk identified in the source.")
+
+scraper = DummyScraper()
+results = scraper.fetch_content(query="Apple earnings", n=3)
+
+inference = Inference(llm=llm, system_prompt="You are a risk analyst.", task_prompt="Identify the main risk.", schema=RiskSchema)
+
+for result in results:
+    ir = inference.run(result)
+    print(ir.structured_output.risk)
+```
+
 ### Rendering
 
 When a `[renderer]` section is present in the config, the report is rendered and saved automatically at the end of `orchestrator.run()`. To render manually:
