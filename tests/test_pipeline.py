@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 from scrapi.inference.schemas import SearchSchema, SummarySchema
 from scrapi.models.inference_result import SearchInferenceResult, SummaryInferenceResult
-from scrapi.models.pipeline_result import PipelineResult
+from scrapi.models.run_result import RunResult
 from scrapi.orchestrator import Orchestrator
 from scrapi.renderer.markdown import MarkdownRenderer
 from scrapi.scraping.dummy import DummyScraper
@@ -55,17 +55,17 @@ def test_pipeline_with_dummy_scraper():
 
     assert orchestrator.result is None
 
-    pipeline_result = orchestrator.run()
+    run_result = orchestrator.run()
 
-    assert isinstance(pipeline_result, PipelineResult)
-    assert len(pipeline_result) == n
-    assert all(pair.search.ai_content.startswith("Dummy article") for pair in pipeline_result.results)
+    assert isinstance(run_result, RunResult)
+    assert len(run_result) == n
+    assert all(pair.search.ai_content.startswith("Dummy article") for pair in run_result.results)
     assert mock_search_inference.analyse.call_count == n
     mock_summary_inference.analyse.assert_called_once()
     assert orchestrator.result == "Final verdict"
 
     renderer = MarkdownRenderer()
-    output = renderer.render(pipeline_result)
+    output = renderer.render(run_result)
     assert isinstance(output, str)
     assert "# Scrapi report" in output
     assert "## Search results" in output
