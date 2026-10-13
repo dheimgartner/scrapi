@@ -42,10 +42,10 @@ def test_pipeline_with_dummy_scraper():
     scraper = DummyScraper()
 
     mock_search_inference = MagicMock()
-    mock_search_inference.analyse.side_effect = lambda _: _make_fake_search_inference()
+    mock_search_inference.run.side_effect = lambda _: _make_fake_search_inference()
 
     mock_summary_inference = MagicMock()
-    mock_summary_inference.analyse.return_value = _make_fake_summary_inference()
+    mock_summary_inference.run.return_value = _make_fake_summary_inference()
 
     orchestrator = Orchestrator(
         scrapers=[(scraper, {"query": "test query", "n": n})],
@@ -60,8 +60,8 @@ def test_pipeline_with_dummy_scraper():
     assert isinstance(run_result, RunResult)
     assert len(run_result) == n
     assert all(pair.search.ai_content.startswith("Dummy article") for pair in run_result.results)
-    assert mock_search_inference.analyse.call_count == n
-    mock_summary_inference.analyse.assert_called_once()
+    assert mock_search_inference.run.call_count == n
+    mock_summary_inference.run.assert_called_once()
     assert orchestrator.result == "Final verdict"
 
     renderer = MarkdownRenderer()
@@ -78,10 +78,10 @@ def test_orchestrator_auto_saves_with_renderer():
     scraper = DummyScraper()
 
     mock_search_inference = MagicMock()
-    mock_search_inference.analyse.side_effect = lambda _: _make_fake_search_inference()
+    mock_search_inference.run.side_effect = lambda _: _make_fake_search_inference()
 
     mock_summary_inference = MagicMock()
-    mock_summary_inference.analyse.return_value = _make_fake_summary_inference()
+    mock_summary_inference.run.return_value = _make_fake_summary_inference()
 
     with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
         output_path = f.name
