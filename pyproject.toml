@@ -36,19 +36,17 @@ dependencies = [
     "pymssql>=2.4.3",
 ]
 
-[project.optional-dependencies]
+[tool.setuptools.packages.find]
+where = ["."]
+
+[dependency-groups]
 dev = [
     "pytest",
     "pytest-cov",
     "black",
     "pipreqs",
 ]
-
-[tool.setuptools.packages.find]
-where = ["."]
-
-[dependency-groups]
-dev = [
+docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.7",
     "mkdocstrings[python]>=1.0.7",
