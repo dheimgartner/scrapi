@@ -51,7 +51,7 @@ def parse_config(source: dict) -> ScrapiConfig:
             ScraperConfig(
                 provider=s["provider"],
                 config=s.get("config", {}),
-                fetch=s.get("fetch", {}),
+                scrape=s.get("scrape", {}),
             )
             for s in source["scrapers"]
         ],

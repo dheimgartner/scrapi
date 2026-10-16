@@ -13,12 +13,12 @@ os.environ["DB_PASSWORD"] = "pleasechangeit@123"
 scraper = SQLScraper("mssql+pymssql://dev:${DB_PASSWORD}@10.89.0.12:1433/testdb")
 
 # Single result containing the full result set
-results = scraper.fetch_content(query="SELECT * FROM testdb.demo.customers", rows_as_results=False)
+results = scraper.scrape(query="SELECT * FROM testdb.demo.customers", rows_as_results=False)
 print(results[0].ai_content)
 print("---")
 
 # One result per row
-results = scraper.fetch_content(query="SELECT * FROM testdb.demo.customers", rows_as_results=True)
+results = scraper.scrape(query="SELECT * FROM testdb.demo.customers", rows_as_results=True)
 for result in results:
     print(result.source)
     print(result.ai_content)
@@ -26,7 +26,7 @@ for result in results:
 
 # --- DummyScraper: no network, instant results ---
 scraper = DummyScraper()
-results = scraper.fetch_content(query="Sergio Ermotti UBS", n=2)
+results = scraper.scrape(query="Sergio Ermotti UBS", n=2)
 
 for result in results:
     print(result.source["url"])
@@ -35,7 +35,7 @@ for result in results:
 
 # --- FileScraper: local files to markdown ---
 scraper = FileScraper()
-results = scraper.fetch_content(query=["path/to/paper1.pdf", "path/to/paper2.pdf"])
+results = scraper.scrape(query=["path/to/paper1.pdf", "path/to/paper2.pdf"])
 
 for result in results:
     print(result.source["path"])
@@ -44,7 +44,7 @@ for result in results:
 
 # --- FinanceScraper: live ticker data via yfinance ---
 scraper = FinanceScraper()
-results = scraper.fetch_content(query=["AAPL", "MSFT"])
+results = scraper.scrape(query=["AAPL", "MSFT"])
 
 for result in results:
     print(result.source["ticker"])
@@ -53,7 +53,7 @@ for result in results:
 
 # --- YahooScraper: live web search ---
 scraper = YahooScraper()
-results = scraper.fetch_content(query="Sergio Ermotti UBS", n=2)
+results = scraper.scrape(query="Sergio Ermotti UBS", n=2)
 
 for result in results:
     print(result.source["url"])
@@ -80,7 +80,7 @@ config = parse_config({
         {
             "provider": "dummy",
             "config": {},
-            "fetch": {"query": "Sergio Ermotti UBS", "n": 2},
+            "scrape": {"query": "Sergio Ermotti UBS", "n": 2},
         },
     ],
 })

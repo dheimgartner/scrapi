@@ -17,7 +17,7 @@ _BASE_CONFIG = {
         "summary": {"system_prompt": "sys", "task_prompt": "sum"},
     },
     "scrapers": [
-        {"provider": "dummy", "config": {}, "fetch": {"query": "q", "n": 2}},
+        {"provider": "dummy", "config": {}, "scrape": {"query": "q", "n": 2}},
     ],
 }
 
@@ -37,7 +37,7 @@ task_prompt = "sum"
 
 [[scrapers]]
 provider = "dummy"
-[scrapers.fetch]
+[scrapers.scrape]
 query = "q"
 n = 2
 """
@@ -50,7 +50,7 @@ def test_parse_config_valid():
     assert config.inference.search.system_prompt == "sys"
     assert config.inference.summary.task_prompt == "sum"
     assert config.scrapers[0].provider == "dummy"
-    assert config.scrapers[0].fetch["n"] == 2
+    assert config.scrapers[0].scrape["n"] == 2
 
 
 def test_load_toml_config_from_file():
@@ -63,7 +63,7 @@ def test_load_toml_config_from_file():
         assert isinstance(config, ScrapiConfig)
         assert config.llm.provider == "ollama"
         assert config.scrapers[0].provider == "dummy"
-        assert config.scrapers[0].fetch["n"] == 2
+        assert config.scrapers[0].scrape["n"] == 2
     finally:
         tmp_path.unlink(missing_ok=True)
 

@@ -25,10 +25,10 @@ class ScraperConfig(BaseConfig):
     """Configuration for a single scraper, including its fetch call arguments.
 
     Attributes:
-        fetch: Keyword arguments forwarded to ``scraper.fetch_content()``.
+        scrape: Keyword arguments forwarded to ``scraper.scrape()``.
     """
 
-    fetch: dict = field(default_factory=dict)
+    scrape: dict = field(default_factory=dict)
 
 
 @dataclass

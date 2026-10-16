@@ -19,7 +19,7 @@ class FileScraper(bs.BaseScraper):
     rendering; all other formats are handled by MarkItDown.
     """
 
-    def _fetch_content(self, query: list[str]) -> list[FileSearchResult]:
+    def _scrape(self, query: list[str]) -> list[FileSearchResult]:
         paths: list[str] = []
         for entry in query:
             expanded = Path(entry).expanduser()

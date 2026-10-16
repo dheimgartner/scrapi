@@ -13,23 +13,23 @@ task_prompt = "Based on all sources, provide a concise final summary. Cite your 
 
 [[scrapers]]
 provider = "dummy"
-[scrapers.fetch]
+[scrapers.scrape]
 query = "example query"
 n = 2
 
 [[scrapers]]
 provider = "file"
-[scrapers.fetch]
+[scrapers.scrape]
 query = ["~/documents/report.pdf", "~/documents/*.md"]
 
 [[scrapers]]
 provider = "finance"
-[scrapers.fetch]
+[scrapers.scrape]
 query = ["AAPL", "MSFT", "GOOGL"]
 
 [[scrapers]]
 provider = "yahoo"
-[scrapers.fetch]
+[scrapers.scrape]
 query = "latest AI research breakthroughs"
 n = 5
 
