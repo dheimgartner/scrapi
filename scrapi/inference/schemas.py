@@ -8,6 +8,9 @@ class SearchSchema(BaseModel):
     result: str = Field(
         description="Result/answer based on the search result in light of the prompt instruction."
     )
+    result_md: str = Field(
+        description="Same as result but formatted as markdown (use headings, bullet points, bold, etc. where appropriate)."
+    )
 
 
 class SummarySchema(BaseModel):
@@ -19,4 +22,7 @@ class SummarySchema(BaseModel):
     )
     result: str = Field(
         description="Summary across all sources in light of the prompt instruction."
+    )
+    result_md: str = Field(
+        description="Same as result but formatted as markdown (use headings, bullet points, bold, etc. where appropriate)."
     )

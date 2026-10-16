@@ -34,4 +34,5 @@ class SearchInference:
             prompted_at=ir.prompted_at,
             structured_output=structured_output,
             result=structured_output.result,
+            result_md=structured_output.result_md,
         )

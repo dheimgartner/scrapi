@@ -17,6 +17,7 @@ class BaseInferenceResult:
     task_prompt: str
     structured_output: BaseModel
     result: str | None = None
+    result_md: str | None = None
     id: str | None = None
     pipeline_id: str | None = None
 
