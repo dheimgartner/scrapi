@@ -2,7 +2,7 @@
 
 **Turn any information set into a structured LLM analysis — in a single config file.**
 
-Point `scrapi` at your sources (web, documents, databases, financial data), describe what you want the LLM to extract and summarise, and get back a typed, auditable result. No glue code. No prompt plumbing. Just configure and run.
+Point `scrapi` at your sources (web, documents, databases, financial data), describe what you want the LLM to extract and summarise, and get back a typed, auditable result — optionally rendered to a standalone report in your format of choice. No glue code. No prompt plumbing. Just configure and run.
 
 ```python
 import scrapi
