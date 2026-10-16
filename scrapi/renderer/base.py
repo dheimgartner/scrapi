@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -14,8 +15,13 @@ class BaseRenderer(ABC):
     and expose ``render()`` and ``save()`` as the public interface.
     """
 
-    def __init__(self, output_path: str | None = None) -> None:
-        self.output_path = output_path
+    def __init__(
+        self,
+        report_path: str | None = None,
+        result_md_path: str | None = None,
+    ) -> None:
+        self.report_path = report_path
+        self.result_md_path = result_md_path
         self._document: str | None = None
 
     @abstractmethod
@@ -24,7 +30,11 @@ class BaseRenderer(ABC):
 
     @abstractmethod
     def save(self) -> None:
-        """Write the rendered document to ``output_path``. Call ``render()`` first."""
+        """Write the rendered document to ``report_path``. Call ``render()`` first."""
+
+    def save_result_md(self, run_result: RunResult) -> None:
+        """Write ``run_result.summary.result_md`` as a standalone markdown file to ``result_md_path``."""
+        Path(self.result_md_path).write_text(run_result.summary.result_md or "")
 
     @property
     def document(self) -> str | None:

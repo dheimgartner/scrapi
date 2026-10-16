@@ -29,7 +29,7 @@ class Orchestrator:
             search_inference: Inference object for per-result analysis.
             summary_inference: Inference object for final summarisation.
             renderer: Optional renderer. If provided, ``run()`` renders the
-                result and saves it to ``renderer.output_path`` when set.
+                result and saves it to ``renderer.report_path`` when set.
         """
         self.scrapers = scrapers
         self.search_inference = search_inference
@@ -68,8 +68,10 @@ class Orchestrator:
 
         if self.renderer is not None:
             self.renderer.render(self.run_result)
-            if self.renderer.output_path is not None:
+            if self.renderer.report_path is not None:
                 self.renderer.save()
+            if self.renderer.result_md_path is not None:
+                self.renderer.save_result_md(self.run_result)
 
         return self.run_result
 

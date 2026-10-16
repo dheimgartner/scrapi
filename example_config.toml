@@ -35,4 +35,5 @@ n = 5
 
 [renderer]
 provider = "markdown"
-output_path = "~/scrapi_report.md"
+report_path = "~/scrapi_report.md"
+result_md_path = "~/scrapi_summary.md"

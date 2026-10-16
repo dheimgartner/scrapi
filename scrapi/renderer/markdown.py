@@ -16,8 +16,12 @@ if TYPE_CHECKING:
 class MarkdownRenderer(BaseRenderer):
     """Renders a ``RunResult`` as a Markdown report."""
 
-    def __init__(self, output_path: str | None = None) -> None:
-        super().__init__(output_path=output_path)
+    def __init__(
+        self,
+        report_path: str | None = None,
+        result_md_path: str | None = None,
+    ) -> None:
+        super().__init__(report_path=report_path, result_md_path=result_md_path)
 
     @singledispatchmethod
     @staticmethod
@@ -80,11 +84,11 @@ class MarkdownRenderer(BaseRenderer):
         return self._document
 
     def save(self) -> None:
-        """Write the rendered report to ``output_path``.
+        """Write the rendered report to ``report_path``.
 
         Raises:
             RendererError: If ``render()`` has not been called yet.
         """
         if self._document is None:
             raise RendererError("call render() before save()")
-        Path(self.output_path).write_text(self._document)
+        Path(self.report_path).write_text(self._document)
