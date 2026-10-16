@@ -81,6 +81,7 @@ class RendererConfig:
 
     provider: str
     output_path: str | None = None
+    result_md_path: str | None = None
 
 
 @dataclass

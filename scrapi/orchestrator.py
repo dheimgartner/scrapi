@@ -70,6 +70,8 @@ class Orchestrator:
             self.renderer.render(self.run_result)
             if self.renderer.output_path is not None:
                 self.renderer.save()
+            if self.renderer.result_md_path is not None:
+                self.renderer.save_result_md(self.run_result)
 
         return self.run_result
 
