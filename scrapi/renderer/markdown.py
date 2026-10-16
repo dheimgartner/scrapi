@@ -16,8 +16,12 @@ if TYPE_CHECKING:
 class MarkdownRenderer(BaseRenderer):
     """Renders a ``RunResult`` as a Markdown report."""
 
-    def __init__(self, report_path: str | None = None) -> None:
-        super().__init__(report_path=report_path)
+    def __init__(
+        self,
+        report_path: str | None = None,
+        result_md_path: str | None = None,
+    ) -> None:
+        super().__init__(report_path=report_path, result_md_path=result_md_path)
 
     @singledispatchmethod
     @staticmethod
