@@ -35,6 +35,19 @@ Define a Pydantic schema that captures not just the decision outcome but also a 
 
 `scrapi` runs a three-stage pipeline:
 
+```mermaid
+flowchart LR
+    cfg[TOML config] --> orch[Orchestrator]
+    orch --> s1[Scraper 1]
+    orch --> sN[Scraper N]
+    s1 --> si1[Search Inference 1]
+    sN --> siN[Search Inference N]
+    si1 --> sum[Summary Inference]
+    siN --> sum
+    sum --> out[RunResult]
+```
+
+
 1. **Scrape** — collect content from one or more sources (web, files, financial data, SQL)
 2. **Search inference** — run a structured LLM extraction on each individual result
 3. **Summary inference** — aggregate all results into a final cross-source summary
