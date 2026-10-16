@@ -35,13 +35,13 @@ task_prompt = "Based on all sources, summarise the company's current situation a
 
 [[scrapers]]
 provider = "yahoo"
-[scrapers.fetch]
+[scrapers.scrape]
 query = "Apple latest company news"
 n = 5
 
 [[scrapers]]
 provider = "finance"
-[scrapers.fetch]
+[scrapers.scrape]
 query = ["AAPL"]
 
 [renderer]
@@ -61,7 +61,7 @@ Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` 
 
 **Scraper providers**
 
-| Provider | `fetch` keys | Description |
+| Provider | `scrape` keys | Description |
 |---|---|---|
 | `yahoo` | `query` (str), `n` (int) | Yahoo web search via DDGS + Selenium |
 | `file` | `query` (list of paths/globs) | Local files; PDFs and common document formats |
@@ -89,7 +89,7 @@ The `sql` scraper supports `${VAR}` placeholders anywhere in the connection stri
 provider = "sql"
 [scrapers.config]
 connection_string = "mssql+pymssql://user:${DB_PASSWORD}@host:1433/mydb"
-[scrapers.fetch]
+[scrapers.scrape]
 query = "SELECT * FROM schema.table"
 rows_as_results = false
 ```
@@ -127,8 +127,8 @@ config = parse_config({
         },
     },
     "scrapers": [
-        {"provider": "yahoo", "fetch": {"query": "Apple latest company news", "n": 5}},
-        {"provider": "finance", "fetch": {"query": ["AAPL"]}},
+        {"provider": "yahoo", "scrape": {"query": "Apple latest company news", "n": 5}},
+        {"provider": "finance", "scrape": {"query": ["AAPL"]}},
     ],
     "renderer": {"provider": "markdown", "output_path": "~/report.md"},
 })
@@ -161,7 +161,7 @@ class RiskSchema(BaseModel):
     risk: str = Field(description="Key risk identified in the source.")
 
 scraper = DummyScraper()
-results = scraper.fetch_content(query="Apple earnings", n=3)
+results = scraper.scrape(query="Apple earnings", n=3)
 
 inference = Inference(llm=llm, system_prompt="You are a risk analyst.", task_prompt="Identify the main risk.", schema=RiskSchema)
 

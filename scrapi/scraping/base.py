@@ -14,11 +14,11 @@ class BaseScraper(ABC):
 
     Implementations may obtain their content from search engines, web
     pages, APIs, document repositories, or other external systems, but
-    should expose a consistent interface through ``fetch_content()``.
+    should expose a consistent interface through ``scrape()``.
     """
 
     @abstractmethod
-    def _fetch_content(self, *args, **kwargs) -> list[BaseSearchResult]:
+    def _scrape(self, *args, **kwargs) -> list[BaseSearchResult]:
         """Retrieve content.
 
         Implementations are responsible for executing the query against
@@ -32,14 +32,14 @@ class BaseScraper(ABC):
         """
         pass
 
-    def fetch_content(self, *args, **kwargs) -> list[BaseSearchResult]:
+    def scrape(self, *args, **kwargs) -> list[BaseSearchResult]:
         """Retrieve content, raising ``NoResultsFoundError`` on failure.
 
-        Wraps ``_fetch_content`` and raises if the result is empty or if
+        Wraps ``_scrape`` and raises if the result is empty or if
         the underlying implementation raises any exception.
         """
         try:
-            results = self._fetch_content(*args, **kwargs)
+            results = self._scrape(*args, **kwargs)
         except Exception as e:
             raise NoResultsFoundError("No results found") from e
         if not results:

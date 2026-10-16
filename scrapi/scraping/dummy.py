@@ -12,7 +12,7 @@ class DummyScraper(bs.BaseScraper):
     a live scraper.
     """
 
-    def _fetch_content(self, query: str, n: int) -> list[WebSearchResult]:
+    def _scrape(self, query: str, n: int) -> list[WebSearchResult]:
         return [self._make_result(query, i) for i in range(1, n + 1)]
 
     @staticmethod

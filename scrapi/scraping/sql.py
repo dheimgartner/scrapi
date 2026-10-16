@@ -31,7 +31,7 @@ class SQLScraper(bs.BaseScraper):
         resolved = _resolve_env_vars(connection_string)
         self._engine = create_engine(resolved)
 
-    def _fetch_content(
+    def _scrape(
         self, query: str, rows_as_results: bool = False
     ) -> list[SQLSearchResult]:
         """Execute ``query`` and return the result set.

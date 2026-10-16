@@ -16,7 +16,7 @@ class FinanceScraper(bs.BaseScraper):
     ``FinancialSnapshot`` and whose ``ai_content`` is a Markdown rendering of it.
     """
 
-    def _fetch_content(self, query: list[str]) -> list[FinanceSearchResult]:
+    def _scrape(self, query: list[str]) -> list[FinanceSearchResult]:
         """Fetch financial snapshots for each ticker in ``query``.
 
         Args:

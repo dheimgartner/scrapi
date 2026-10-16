@@ -21,7 +21,7 @@ class YahooScraper(bs.BaseScraper):
     each result page via Selenium, and converts it to Markdown.
     """
 
-    def _fetch_content(self, query: str, n: int) -> list[WebSearchResult]:
+    def _scrape(self, query: str, n: int) -> list[WebSearchResult]:
         """Search Yahoo and return up to ``n`` results as articles.
 
         Args:

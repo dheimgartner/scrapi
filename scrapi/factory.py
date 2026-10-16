@@ -35,7 +35,7 @@ def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
     )
 
     scrapers = [
-        (_base_factory(registry.SCRAPER_REGISTRY[sc.provider], sc), sc.fetch)
+        (_base_factory(registry.SCRAPER_REGISTRY[sc.provider], sc), sc.scrape)
         for sc in config.scrapers
     ]
 

@@ -24,8 +24,8 @@ class Orchestrator:
         """Initializes the Orchestrator with pre-built dependencies.
 
         Args:
-            scrapers: List of (scraper, fetch_kwargs) pairs. Each scraper's
-                ``fetch_content`` is called with its associated kwargs.
+            scrapers: List of (scraper, scrape_kwargs) pairs. Each scraper's
+                ``scrape`` is called with its associated kwargs.
             search_inference: Inference object for per-result analysis.
             summary_inference: Inference object for final summarisation.
             renderer: Optional renderer. If provided, ``run()`` renders the
@@ -53,8 +53,8 @@ class Orchestrator:
         pairs: list[ResultPair] = []
         search_inference_results: list[SearchInferenceResult] = []
 
-        for scraper, fetch_kwargs in self.scrapers:
-            for sr in scraper.fetch_content(**fetch_kwargs):
+        for scraper, scrape_kwargs in self.scrapers:
+            for sr in scraper.scrape(**scrape_kwargs):
                 sr.pipeline_id = self._pipeline_id
                 ir = self.search_inference.run(sr)
                 ir.pipeline_id = self._pipeline_id
