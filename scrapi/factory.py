@@ -43,7 +43,7 @@ def make_orchestrator(config: schema.ScrapiConfig) -> Orchestrator:
     if config.renderer is not None:
         renderer_cls = registry.RENDERER_REGISTRY[config.renderer.provider]
         renderer = renderer_cls(
-            output_path=config.renderer.output_path,
+            report_path=config.renderer.report_path,
             result_md_path=config.renderer.result_md_path,
         )
 

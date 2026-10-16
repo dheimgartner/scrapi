@@ -76,11 +76,11 @@ class RendererConfig:
 
     Attributes:
         provider: Registry key identifying the renderer implementation to use.
-        output_path: Optional path where the rendered document is saved.
+        report_path: Optional path where the rendered document is saved.
     """
 
     provider: str
-    output_path: str | None = None
+    report_path: str | None = None
     result_md_path: str | None = None
 
 

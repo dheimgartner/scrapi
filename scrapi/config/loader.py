@@ -26,7 +26,7 @@ def parse_config(source: dict) -> ScrapiConfig:
     renderer = (
         RendererConfig(
             provider=renderer_raw["provider"],
-            output_path=renderer_raw.get("output_path"),
+            report_path=renderer_raw.get("report_path"),
             result_md_path=renderer_raw.get("result_md_path"),
         )
         if renderer_raw is not None
