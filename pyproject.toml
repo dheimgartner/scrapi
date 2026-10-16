@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scrapi"
-version = "0.0.0"
+version = "0.1.0"
 description = "Scrape information and analyze it with a LLM"
 readme = "README.md"
 requires-python = ">=3.12"
-#license = { file = "LICENSE" }
+license = { file = "LICENSE" }
 authors = [{name = "Dominik Lehmann", email = "dominik.lehmann@finma.ch"}, { name = "Daniel Heimgartner", email = "daniel.heimgartner@finma.ch" }]
 dependencies = [
     "beautifulsoup4",
