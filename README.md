@@ -46,10 +46,10 @@ query = ["AAPL"]
 
 [renderer]
 provider = "markdown"
-output_path = "~/report.md"
+report_path = "~/report.md"
 ```
 
-Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks. When `[renderer]` is present, `orchestrator.run()` automatically renders and saves the report to `output_path`.
+Multiple scrapers can be combined in a single run by adding more `[[scrapers]]` blocks. When `[renderer]` is present, `orchestrator.run()` automatically renders and saves the report to `report_path`.
 
 **LLM providers**
 
@@ -130,7 +130,7 @@ config = parse_config({
         {"provider": "yahoo", "scrape": {"query": "Apple latest company news", "n": 5}},
         {"provider": "finance", "scrape": {"query": ["AAPL"]}},
     ],
-    "renderer": {"provider": "markdown", "output_path": "~/report.md"},
+    "renderer": {"provider": "markdown", "report_path": "~/report.md"},
 })
 
 orchestrator = make_orchestrator(config)
@@ -177,9 +177,9 @@ When a `[renderer]` section is present in the config, the report is rendered and
 ```python
 from scrapi.renderer.markdown import MarkdownRenderer
 
-renderer = MarkdownRenderer(output_path="report.md")
+renderer = MarkdownRenderer(report_path="report.md")
 renderer.render(result)
 renderer.save()
 ```
 
-`render()` returns the document as a string and caches it; `save()` writes the cache to `output_path`.
+`render()` returns the document as a string and caches it; `save()` writes the cache to `report_path`.
