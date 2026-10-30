@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from functools import singledispatchmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -53,16 +54,38 @@ class MarkdownRenderer(BaseRenderer):
     def _(result: RunResult) -> str:
         if len(result) == 0:
             return "_No results._"
-        rows = ["| # | ID | Scraper | Status | Fetched at | Source |", "|---|---|---|---|---|---|"]
+        sections = []
         for i, pair in enumerate(result, start=1):
             sr = pair.search
-            source = ", ".join(f"{k}: {v}" for k, v in sr.source.items())
             status = str(sr.status.status)
             if sr.status.message:
                 status += f" {sr.status.message}"
-            fetched_at = sr.fetched_at.strftime("%Y-%m-%d %H:%M:%S")
-            rows.append(f"| {i} | {sr.id} | {sr.scraper_repr} | {status} | {fetched_at} | {source} |")
-        return "\n".join(rows)
+            fields = {
+                "ID": sr.id,
+                "Status": status,
+                "Fetched at": sr.fetched_at.strftime("%Y-%m-%d %H:%M:%S"),
+                **sr.source,
+            }
+            lines = [f"### {i}. {sr.scraper_repr}", ""]
+            lines += [MarkdownRenderer._field(k, v) for k, v in fields.items()]
+            sections.append("\n".join(lines).rstrip())
+        return "\n\n".join(sections)
+
+    @staticmethod
+    def _field(key: str, value: object) -> str:
+        """Format ``key``/``value`` as a Markdown list item.
+
+        Single-line values are rendered inline; multi-line values are placed
+        in a fenced code block nested under the item so their formatting is
+        preserved.
+        """
+        value = str(value).strip("\n")
+        if "\n" not in value:
+            return f"- **{key}:** {value}"
+        longest_run = max((len(run) for run in re.findall(r"`+", value)), default=0)
+        fence = "`" * max(3, longest_run + 1)
+        body = "\n".join(f"  {line}" if line else "" for line in value.split("\n"))
+        return f"- **{key}:**\n\n  {fence}\n{body}\n  {fence}\n"
 
     def render(self, run_result: RunResult) -> str:
         """Render ``run_result`` as a Markdown report.
