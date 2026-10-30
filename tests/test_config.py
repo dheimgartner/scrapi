@@ -71,11 +71,11 @@ def test_load_toml_config_from_file():
 def test_parse_config_renderer():
     config = parse_config({
         **_BASE_CONFIG,
-        "renderer": {"provider": "markdown", "output_path": "~/out.md"},
+        "renderer": {"provider": "markdown", "report_path": "~/out.md"},
     })
     assert isinstance(config.renderer, RendererConfig)
     assert config.renderer.provider == "markdown"
-    assert config.renderer.output_path == "~/out.md"
+    assert config.renderer.report_path == "~/out.md"
 
 
 def test_parse_config_renderer_optional():
@@ -83,9 +83,9 @@ def test_parse_config_renderer_optional():
     assert config.renderer is None
 
 
-def test_parse_config_renderer_no_output_path():
+def test_parse_config_renderer_no_report_path():
     config = parse_config({**_BASE_CONFIG, "renderer": {"provider": "markdown"}})
-    assert config.renderer.output_path is None
+    assert config.renderer.report_path is None
 
 
 def test_load_toml_config_invalid_toml():

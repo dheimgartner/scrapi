@@ -18,7 +18,7 @@ def _make_fake_search_inference() -> SearchInferenceResult:
         prompted_at=datetime(2025, 1, 1),
         system_prompt="sys",
         task_prompt="task",
-        structured_output=SearchSchema(summary="short summary", result="finding"),
+        structured_output=SearchSchema(summary="short summary", result="finding", result_md="finding"),
         result="finding",
     )
 
@@ -32,6 +32,7 @@ def _make_fake_summary_inference() -> SummaryInferenceResult:
             summary="overall summary",
             paragraphs="key paragraphs here",
             result="Final verdict",
+            result_md="Final verdict",
         ),
         result="Final verdict",
     )
@@ -87,7 +88,7 @@ def test_orchestrator_auto_saves_with_renderer():
         output_path = f.name
 
     try:
-        renderer = MarkdownRenderer(output_path=output_path)
+        renderer = MarkdownRenderer(report_path=output_path)
         orchestrator = Orchestrator(
             scrapers=[(scraper, {"query": "test", "n": 1})],
             search_inference=mock_search_inference,
