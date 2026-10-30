@@ -4590,7 +4590,7 @@ wheels = [
 
 [[package]]
 name = "scrapi"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -4618,16 +4618,14 @@ dependencies = [
     { name = "yfinance" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "black" },
     { name = "pipreqs" },
     { name = "pytest" },
     { name = "pytest-cov" },
 ]
-
-[package.dev-dependencies]
-dev = [
+docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
     { name = "mkdocstrings", extra = ["python"] },
@@ -4636,7 +4634,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4" },
-    { name = "black", marker = "extra == 'dev'" },
     { name = "chainlit" },
     { name = "ddgs" },
     { name = "httpx" },
@@ -4646,15 +4643,12 @@ requires-dist = [
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "markitdown" },
-    { name = "pipreqs", marker = "extra == 'dev'" },
     { name = "primp" },
     { name = "psutil" },
     { name = "px-proxy" },
     { name = "pydantic" },
     { name = "pymssql", specifier = ">=2.4.3" },
     { name = "pymupdf4llm" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pyyaml" },
     { name = "selenium" },
     { name = "sqlalchemy" },
@@ -4663,10 +4657,15 @@ requires-dist = [
     { name = "truststore" },
     { name = "yfinance" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "black" },
+    { name = "pipreqs" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
+docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", specifier = ">=9.7.7" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.7" },
